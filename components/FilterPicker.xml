@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="FilterPicker" extends="Group">
+    <interface>
+        <!-- layout: { rows, rowHeight, headerH, width } set once by GuideScene; rows
+             line up with the guide rows underneath. -->
+        <field id="layout"   type="assocarray" onChange="onLayoutChange" />
+        <!-- data: { items: [{ key, label, count }], active } set together when the
+             picker opens; active is the key of the filter applied now ("" = all channels). -->
+        <field id="data"     type="assocarray" onChange="onDataChange" />
+        <field id="keyEvent" type="assocarray" onChange="onKeyEventField" />
+        <!-- output: key of the filter picked with OK. The picker hides itself on
+             OK and on Back/Left/replay, so GuideScene only watches this. -->
+        <field id="chosen"   type="string" value="" alwaysNotify="true" />
+    </interface>
+    <children>
+        <Rectangle id="bg" color="0x2F3227FF" width="560" height="400" />
+        <Rectangle id="edge" color="0x414535FF" width="2" height="400" translation="[558, 0]" />
+        <Label id="title"
+            text="On now"
+            color="0x96BBBBFF"
+            font="font:SmallBoldSystemFont"
+            vertAlign="center"
+            translation="[16, 0]"
+            width="528"
+            height="40" />
+        <!-- Pooled row nodes, created in onLayoutChange -->
+        <Group id="rowGroup" translation="[0, 40]" />
+    </children>
+    <script type="text/brightscript" uri="FilterPicker.brs" />
+</component>

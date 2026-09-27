@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="RecordingsTask" extends="Task">
+    <interface>
+        <!-- input: enabled sources that have a Dispatcharr apiKey -->
+        <field id="sources" type="array" />
+        <!-- output: { ok, recs } where recs is { "<source prefix><channel uuid>": [ { start, stop } ] }.
+             ok is false when any source's request failed, so MainScene keeps what it had. -->
+        <field id="result" type="assocarray" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/RegistryUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/DispatcharrApi.brs" />
+    <script type="text/brightscript" uri="RecordingsTask.brs" />
+</component>

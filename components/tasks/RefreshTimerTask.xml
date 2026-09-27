@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="RefreshTimerTask" extends="Task">
+    <interface>
+        <!-- input -->
+        <field id="intervalMin" type="integer" value="120" onChange="onIntervalChange" />
+        <!-- output: toggled to signal MainScene to run FetchDataTask -->
+        <field id="tick"        type="boolean" value="false" />
+    </interface>
+    <script type="text/brightscript" uri="RefreshTimerTask.brs" />
+</component>

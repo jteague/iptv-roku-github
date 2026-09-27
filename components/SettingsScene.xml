@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SettingsScene" extends="Group">
+    <interface>
+        <!-- "saved" (source URLs changed, re-fetch) | "savedLocal" (only guide/refresh
+             options changed) | "refresh" | "cancelled" -->
+        <field id="action" type="string" value="" alwaysNotify="true" />
+        <!-- Loaded-data summary for the About page, set by MainScene (epgInfo()) -->
+        <field id="epgInfo" type="assocarray" onChange="renderAbout" />
+        <!-- { channelId: streamUrl } for the codec-hidden channels that are loaded, set by
+             MainScene (codecHiddenStreamUrls()); Hidden Channels > Retry plays them -->
+        <field id="streamUrls" type="assocarray" />
+    </interface>
+    <children>
+        <Rectangle id="bg" color="0x1F2119FF" width="1920" height="1080" translation="[0,0]" />
+
+        <!-- ── Left nav ─────────────────────────────────────────────────── -->
+        <Rectangle id="navPanel" color="0x2F3227FF" width="440" height="1080" translation="[0,0]" />
+        <Rectangle id="navDivider" color="0x414535FF" width="2" height="1080" translation="[440,0]" />
+
+        <Label id="titleLabel"
+            text="Settings"
+            font="font:LargeBoldSystemFont"
+            color="0xF2E3BCFF"
+            translation="[60, 70]" />
+
+        <!-- nav item 0: IPTV Sources -->
+        <Rectangle id="navBg0" color="0x618985FF" width="380" height="80" translation="[30, 200]" />
+        <Rectangle id="navBar0" color="0x96BBBBFF" width="6" height="80" translation="[30, 200]" visible="false" />
+        <Label id="navLabel0"
+            text="IPTV Sources"
+            font="font:MediumBoldSystemFont"
+            color="0xF2E3BCFF"
+            width="320" height="80"
+            vertAlign="center"
+            translation="[70, 200]" />
+
+        <!-- nav item 1: Guide -->
+        <Rectangle id="navBg1" color="0x00000000" width="380" height="80" translation="[30, 292]" />
+        <Rectangle id="navBar1" color="0x96BBBBFF" width="6" height="80" translation="[30, 292]" visible="false" />
+        <Label id="navLabel1"
+            text="Guide"
+            font="font:MediumBoldSystemFont"
+            color="0x96BBBBFF"
+            width="320" height="80"
+            vertAlign="center"
+            translation="[70, 292]" />
+
+        <!-- nav item 2: Options -->
+        <Rectangle id="navBg2" color="0x00000000" width="380" height="80" translation="[30, 384]" />
+        <Rectangle id="navBar2" color="0x96BBBBFF" width="6" height="80" translation="[30, 384]" visible="false" />
+        <Label id="navLabel2"
+            text="Options"
+            font="font:MediumBoldSystemFont"
+            color="0x96BBBBFF"
+            width="320" height="80"
+            vertAlign="center"
+            translation="[70, 384]" />
+
+        <!-- nav item 3: Hidden Channels -->
+        <Rectangle id="navBg3" color="0x00000000" width="380" height="80" translation="[30, 476]" />
+        <Rectangle id="navBar3" color="0x96BBBBFF" width="6" height="80" translation="[30, 476]" visible="false" />
+        <Label id="navLabel3"
+            text="Hidden Channels"
+            font="font:MediumBoldSystemFont"
+            color="0x96BBBBFF"
+            width="320" height="80"
+            vertAlign="center"
+            translation="[70, 476]" />
+
+        <!-- nav item 4: About -->
+        <Rectangle id="navBg4" color="0x00000000" width="380" height="80" translation="[30, 568]" />
+        <Rectangle id="navBar4" color="0x96BBBBFF" width="6" height="80" translation="[30, 568]" visible="false" />
+        <Label id="navLabel4"
+            text="About"
+            font="font:MediumBoldSystemFont"
+            color="0x96BBBBFF"
+            width="320" height="80"
+            vertAlign="center"
+            translation="[70, 568]" />
+
+        <Label id="navHint"
+            text="Back returns to the guide"
+            font="font:SmallestSystemFont"
+            color="0x96BBBB66"
+            translation="[60, 1010]" />
+
+        <!-- ── Page: IPTV Sources (list) ────────────────────────────────── -->
+        <!-- Source rows are pooled nodes built in SettingsScene.brs (renderSourceList). -->
+        <Group id="pageSources">
+            <Label text="IPTV Sources"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="Channels appear in the guide in this order. OK edits a source; Up / Down move it."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                translation="[500, 128]" />
+
+            <Group id="sourceList" />
+
+            <Rectangle id="addBtn" color="0x414535FF" width="260" height="64" translation="[500, 190]" />
+            <Label id="addBtnLabel" text="+ Add Source"
+                color="0xF2E3BCFF"
+                font="font:MediumBoldSystemFont"
+                width="260" height="64"
+                horizAlign="center" vertAlign="center"
+                translation="[500, 190]" />
+            <Label id="sourceListHint"
+                text=""
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="600" height="64"
+                horizAlign="right" vertAlign="center"
+                translation="[1260, 190]" />
+        </Group>
+
+        <!-- ── Page: IPTV Sources (editing one source) ──────────────────── -->
+        <Group id="pageSourceEdit" visible="false">
+            <Label id="editTitle"
+                text="Edit Source"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="The M3U playlist is required; everything else is optional. Back returns to the list."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                translation="[500, 128]" />
+
+            <!-- URLs card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="420" translation="[500, 190]" />
+            <Label text="Name (shown in this list and in error messages)"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 202]" />
+            <Rectangle id="nameBox" color="0x414535FF" width="1300" height="60" translation="[530, 232]" />
+            <TextEditBox id="nameInput"
+                width="1288" height="56"
+                translation="[536, 234]"
+                hintText="Defaults to the playlist's host name"
+                maxTextLength="40" />
+
+            <Label text="M3U playlist URL"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 302]" />
+            <Rectangle id="m3uBox" color="0x414535FF" width="1300" height="60" translation="[530, 332]" />
+            <TextEditBox id="m3uInput"
+                width="1288" height="56"
+                translation="[536, 334]"
+                hintText="http://provider.com/playlist.m3u8"
+                maxTextLength="512" />
+
+            <Label text="XMLTV EPG URL"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 402]" />
+            <Rectangle id="epgBox" color="0x414535FF" width="1300" height="60" translation="[530, 432]" />
+            <TextEditBox id="epgInput"
+                width="1288" height="56"
+                translation="[536, 434]"
+                hintText="http://provider.com/epg.xml"
+                maxTextLength="512" />
+
+            <Label text="Dispatcharr API key (shows scheduled recordings in the guide)"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 502]" />
+            <Rectangle id="apiKeyBox" color="0x414535FF" width="1300" height="60" translation="[530, 532]" />
+            <TextEditBox id="apiKeyInput"
+                width="1288" height="56"
+                translation="[536, 534]"
+                hintText="Leave empty for other providers"
+                maxTextLength="128" />
+
+            <!-- Options card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="154" translation="[500, 626]" />
+            <Label text="Show in guide"
+                font="font:SmallBoldSystemFont"
+                color="0xF2E3BCFF"
+                width="560" height="56"
+                vertAlign="center"
+                translation="[530, 640]" />
+            <Rectangle id="enabledRing" color="0x00000000" width="424" height="68" translation="[1094, 634]" />
+            <Rectangle id="enabledPill0" color="0x414535FF" width="200" height="56" translation="[1100, 640]" />
+            <Label id="enabledPillLabel0"
+                text="On"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[1100, 640]" />
+            <Rectangle id="enabledPill1" color="0x414535FF" width="200" height="56" translation="[1312, 640]" />
+            <Label id="enabledPillLabel1"
+                text="Off"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[1312, 640]" />
+
+            <Label text="Rewrite .ts streams to HLS (ErsatzTV)"
+                font="font:SmallBoldSystemFont"
+                color="0xF2E3BCFF"
+                width="560" height="56"
+                vertAlign="center"
+                translation="[530, 710]" />
+            <Rectangle id="tsRing" color="0x00000000" width="424" height="68" translation="[1094, 704]" />
+            <Rectangle id="tsPill0" color="0x414535FF" width="200" height="56" translation="[1100, 710]" />
+            <Label id="tsPillLabel0"
+                text="Off"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[1100, 710]" />
+            <Rectangle id="tsPill1" color="0x414535FF" width="200" height="56" translation="[1312, 710]" />
+            <Label id="tsPillLabel1"
+                text="On"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[1312, 710]" />
+
+            <Rectangle id="doneBtn" color="0x414535FF" width="200" height="56" translation="[500, 796]" />
+            <Label id="doneBtnLabel" text="Done"
+                color="0xF2E3BCFF"
+                font="font:SmallBoldSystemFont"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[500, 796]" />
+            <Rectangle id="removeBtn" color="0xC19875FF" width="240" height="56" translation="[724, 796]" />
+            <Label id="removeBtnLabel" text="Remove Source"
+                color="0x414535FF"
+                font="font:SmallBoldSystemFont"
+                width="240" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[724, 796]" />
+        </Group>
+
+        <!-- ── Page: Guide ──────────────────────────────────────────────── -->
+        <Group id="pageGuide" visible="false">
+            <Label text="Guide"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="How much of the schedule is shown and how large the channel rows are."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                translation="[500, 128]" />
+
+            <!-- Time window card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="200" translation="[500, 190]" />
+            <Label text="Time window"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 212]" />
+            <Label text="Hours of programming shown across the guide"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 262]" />
+            <Rectangle id="guideHoursRing" color="0x00000000" width="636" height="68" translation="[524, 296]" />
+            <Rectangle id="guideHoursPill0" color="0x414535FF" width="200" height="56" translation="[530, 302]" />
+            <Label id="guideHoursPillLabel0"
+                text="2 hours"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[530, 302]" />
+            <Rectangle id="guideHoursPill1" color="0x414535FF" width="200" height="56" translation="[742, 302]" />
+            <Label id="guideHoursPillLabel1"
+                text="3 hours"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[742, 302]" />
+            <Rectangle id="guideHoursPill2" color="0x414535FF" width="200" height="56" translation="[954, 302]" />
+            <Label id="guideHoursPillLabel2"
+                text="4 hours"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="200" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[954, 302]" />
+            <Label text="Fewer hours means wider program cells."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="640" height="56"
+                vertAlign="center"
+                translation="[1200, 302]" />
+
+            <!-- Channels shown card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="200" translation="[500, 420]" />
+            <Label text="Channels shown"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 442]" />
+            <Label text="Number of channel rows on screen (5 to 15)"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 492]" />
+            <Rectangle id="guideRowsRing" color="0x00000000" width="372" height="68" translation="[524, 526]" />
+            <Rectangle id="guideRowsBox" color="0x414535FF" width="360" height="56" translation="[530, 532]" />
+            <Label id="guideRowsDec"
+                text="&lt;"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                width="60" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[530, 532]" />
+            <Label id="guideRowsValue"
+                text="13 rows"
+                font="font:SmallBoldSystemFont"
+                color="0xF2E3BCFF"
+                width="240" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[590, 532]" />
+            <Label id="guideRowsInc"
+                text="&gt;"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                width="60" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[830, 532]" />
+            <Label text="Fewer rows make the guide shorter and the picture above it larger."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="920" height="56"
+                vertAlign="center"
+                translation="[920, 532]" />
+        </Group>
+
+        <!-- ── Page: Options ────────────────────────────────────────────── -->
+        <Group id="pageOptions" visible="false">
+            <Label text="Options"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="Refresh schedule and what happens when the app starts."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                translation="[500, 128]" />
+
+            <!-- Refresh card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="200" translation="[500, 190]" />
+            <Label text="Data refresh"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 212]" />
+            <Label text="Refresh interval (minutes, minimum 15)"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 262]" />
+            <Rectangle id="intervalBox" color="0x414535FF" width="220" height="60" translation="[530, 292]" />
+            <TextEditBox id="intervalInput"
+                width="208" height="56"
+                translation="[536, 294]"
+                text="120"
+                maxTextLength="5" />
+            <Label text="Playlists and EPG data are re-downloaded in the background on this schedule."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="1000" height="60"
+                vertAlign="center"
+                translation="[780, 292]" />
+
+            <!-- Launch card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="200" translation="[500, 420]" />
+            <Label text="On launch"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 442]" />
+            <Label text="What the guide shows once the channels have loaded"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 492]" />
+            <Rectangle id="launchRing" color="0x00000000" width="564" height="68" translation="[524, 526]" />
+            <Rectangle id="launchPill0" color="0x414535FF" width="240" height="56" translation="[530, 532]" />
+            <Label id="launchPillLabel0"
+                text="Open guide"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="240" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[530, 532]" />
+            <Rectangle id="launchPill1" color="0x414535FF" width="300" height="56" translation="[782, 532]" />
+            <Label id="launchPillLabel1"
+                text="Resume last channel"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="300" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[782, 532]" />
+            <Label text="Resume plays the last channel you watched in the picture-in-picture window."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="740" height="56"
+                wrap="true"
+                vertAlign="center"
+                translation="[1110, 532]" />
+        </Group>
+
+        <!-- ── Page: Hidden Channels ────────────────────────────────────── -->
+        <!-- Channel rows are pooled nodes built in SettingsScene.brs (renderHiddenList). -->
+        <Group id="pageHidden" visible="false">
+            <Label text="Hidden Channels"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="Hidden with a long press of OK in the guide, or because the stream's codec is unsupported (back after 14 days). Changes apply right away."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="1360"
+                translation="[500, 128]" />
+
+            <Group id="hiddenList" />
+
+            <Rectangle id="unhideAllBtn" color="0xC19875FF" width="260" height="56" translation="[500, 190]" />
+            <Label id="unhideAllBtnLabel" text="Unhide All"
+                color="0x414535FF"
+                font="font:SmallBoldSystemFont"
+                width="260" height="56"
+                horizAlign="center" vertAlign="center"
+                translation="[500, 190]" />
+            <Label id="hiddenListHint"
+                text=""
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                width="600" height="56"
+                horizAlign="right" vertAlign="center"
+                translation="[1260, 190]" />
+        </Group>
+
+        <!-- ── Page: About ──────────────────────────────────────────────── -->
+        <!-- Values are filled in by renderAbout (SettingsScene.brs). -->
+        <Group id="pageAbout" visible="false">
+            <Label text="About"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="This app, this Roku, and the channel data loaded right now."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                translation="[500, 128]" />
+
+            <!-- App and device card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="400" translation="[500, 190]" />
+            <Label text="App and device"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 212]" />
+            <Label text="App version"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 266]" />
+            <Label id="aboutVersion"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 266]" />
+            <Label text="Device"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 310]" />
+            <Label id="aboutDevice"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 310]" />
+            <Label text="Roku OS"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 354]" />
+            <Label id="aboutOs"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 354]" />
+            <Label text="UI resolution"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 398]" />
+            <Label id="aboutUi"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 398]" />
+            <Label text="Display"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 442]" />
+            <Label id="aboutDisplay"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 442]" />
+            <Label text="IP address"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 486]" />
+            <Label id="aboutIp"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 486]" />
+            <Label text="Free memory"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 530]" />
+            <Label id="aboutMemory"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 530]" />
+
+            <!-- Data card -->
+            <Rectangle color="0x2F3227FF" width="1360" height="224" translation="[500, 610]" />
+            <Label text="Channel data"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 632]" />
+            <Label text="Channels"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 686]" />
+            <Label id="aboutChannels"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 686]" />
+            <Label text="Guide data"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 730]" />
+            <Label id="aboutGuide"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 730]" />
+            <Label text="EPG date range"
+                font="font:SmallSystemFont"
+                color="0x96BBBBFF"
+                translation="[530, 774]" />
+            <Label id="aboutEpg"
+                text=""
+                font="font:SmallSystemFont"
+                color="0xF2E3BCFF"
+                width="940"
+                translation="[880, 774]" />
+        </Group>
+
+        <!-- ── Shared footer (all pages) ───────────────────────────────── -->
+        <Rectangle color="0x414535FF" width="1360" height="2" translation="[500, 900]" />
+
+        <Label id="errorLabel"
+            text=""
+            color="0xC19875FF"
+            font="font:SmallSystemFont"
+            translation="[500, 860]" />
+
+        <Rectangle id="saveBtn" color="0x618985FF" width="200" height="64" translation="[500, 940]" />
+        <Label id="saveBtnLabel" text="Save"
+            color="0xF2E3BCFF"
+            font="font:MediumBoldSystemFont"
+            width="200" height="64"
+            horizAlign="center" vertAlign="center"
+            translation="[500, 940]" />
+
+        <Rectangle id="refreshBtn" color="0x414535FF" width="240" height="64" translation="[724, 940]" />
+        <Label id="refreshBtnLabel" text="Refresh Now"
+            color="0xF2E3BCFF"
+            font="font:MediumBoldSystemFont"
+            width="240" height="64"
+            horizAlign="center" vertAlign="center"
+            translation="[724, 940]" />
+
+        <Label text="Left returns to the menu"
+            font="font:SmallestSystemFont"
+            color="0x96BBBB66"
+            width="500" height="64"
+            horizAlign="right" vertAlign="center"
+            translation="[1360, 940]" />
+
+        <!-- ── Retry overlay (Hidden Channels > Retry), filled by openRetry ── -->
+        <Group id="retryOverlay" visible="false">
+            <Rectangle color="0x1F2119E6" width="1920" height="1080" translation="[0, 0]" />
+            <Rectangle color="0x2F3227FF" width="760" height="640" translation="[580, 220]" />
+            <Label id="retryTitle"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                width="680"
+                translation="[620, 250]" />
+            <Rectangle color="0x000000FF" width="680" height="383" translation="[620, 310]" />
+            <Video id="retryVideo" width="680" height="383" translation="[620, 310]" />
+            <BusySpinner id="retrySpinner" translation="[916, 457]" visible="false" />
+            <Label id="retryResult"
+                font="font:SmallBoldSystemFont"
+                color="0x96BBBBFF"
+                width="680"
+                wrap="true"
+                translation="[620, 716]" />
+            <Label id="retryHint"
+                font="font:SmallestSystemFont"
+                color="0x96BBBB66"
+                width="680"
+                horizAlign="right"
+                translation="[620, 812]" />
+        </Group>
+        <Timer id="retryTimer" repeat="false" duration="20" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/utils/RegistryUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="SettingsScene.brs" />
+</component>

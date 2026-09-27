@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+    <children>
+        <!-- Loading screen -->
+        <Rectangle id="loadingBg"
+            color="0x1F2119FF"
+            width="1920"
+            height="1080"
+            translation="[0,0]"
+            visible="true" />
+        <Label id="loadingTitle"
+            text="Teague Vision"
+            font="font:LargeBoldSystemFont"
+            color="0xF2E3BCFF"
+            horizAlign="center"
+            translation="[760, 440]"
+            width="400"
+            visible="true" />
+        <BusySpinner id="loadingSpinner"
+            translation="[916, 540]"
+            visible="false" />
+        <Label id="loadingMsg"
+            text=""
+            font="font:SmallSystemFont"
+            color="0x96BBBBFF"
+            horizAlign="center"
+            translation="[660, 600]"
+            width="600"
+            visible="true" />
+        <Rectangle id="loadingBarTrack"
+            color="0x414535FF"
+            width="600"
+            height="8"
+            translation="[660, 650]"
+            visible="false" />
+        <Rectangle id="loadingBarFill"
+            color="0x618985FF"
+            width="0"
+            height="8"
+            translation="[660, 650]"
+            visible="false" />
+
+        <!-- Error screen (initial fetch failure) -->
+        <Rectangle id="errorBg"
+            color="0x1F2119FF"
+            width="1920"
+            height="1080"
+            translation="[0,0]"
+            visible="false" />
+        <Label id="errorMsg"
+            text=""
+            font="font:MediumSystemFont"
+            color="0xC19875FF"
+            horizAlign="center"
+            translation="[560, 460]"
+            width="800"
+            wrap="true"
+            visible="false" />
+        <Rectangle id="retryBtn"
+            color="0x618985FF"
+            width="160"
+            height="56"
+            translation="[880, 560]"
+            visible="false" />
+        <Label id="retryBtnLabel"
+            text="Retry"
+            color="0xF2E3BCFF"
+            font="font:MediumBoldSystemFont"
+            horizAlign="center"
+            translation="[880, 574]"
+            width="160"
+            visible="false" />
+        <Label id="errorHint"
+            text="Press * for Settings"
+            color="0x96BBBBAA"
+            font="font:SmallSystemFont"
+            horizAlign="center"
+            translation="[560, 650]"
+            width="800"
+            visible="false" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/utils/RegistryUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/DispatcharrApi.brs" />
+    <script type="text/brightscript" uri="MainScene.brs" />
+</component>

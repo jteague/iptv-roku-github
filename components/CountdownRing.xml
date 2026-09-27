@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- 64x64 countdown: a ring of ticks that go dark clockwise from 12 o'clock,
+     with the seconds left in the middle. Purely visual; the owner keeps its
+     own Timer and sends control="start"/"stop" alongside it. -->
+<component name="CountdownRing" extends="Group">
+    <interface>
+        <field id="duration" type="float" value="10" />
+        <field id="control"  type="string" onChange="onControl" alwaysNotify="true" />
+    </interface>
+    <children>
+        <!-- Animated clock: opacity runs 1 -> 0 (fraction of time left).
+             Never drawn; onClockTick reads it. -->
+        <Rectangle id="clock" width="1" height="1" visible="false" />
+        <Label id="secs"
+            color="0xF2E3BCFF"
+            font="font:SmallBoldSystemFont"
+            width="64"
+            height="64"
+            translation="[0, 3]"
+            horizAlign="center"
+            vertAlign="center" />
+        <Animation id="anim" repeat="false" easeFunction="linear">
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[1.0, 0.0]" fieldToInterp="clock.opacity" />
+        </Animation>
+    </children>
+    <script type="text/brightscript" uri="CountdownRing.brs" />
+</component>

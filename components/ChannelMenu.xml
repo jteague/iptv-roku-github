@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ChannelMenu" extends="Group">
+    <interface>
+        <!-- data: { title, subtitle, items: [{ key, label }] } set when the menu opens;
+             the box is sized to the item count. -->
+        <field id="data"     type="assocarray" onChange="onDataChange" />
+        <field id="keyEvent" type="assocarray" onChange="onKeyEventField" />
+        <!-- output: key of the item picked with OK. The menu hides itself on OK and
+             on Back/Left, so GuideScene only watches this. -->
+        <field id="chosen"   type="string" value="" alwaysNotify="true" />
+    </interface>
+    <children>
+        <Rectangle id="border" color="0x414535FF" width="644" height="200" translation="[-2, -2]" />
+        <Rectangle id="bg" color="0x2F3227FF" width="640" height="196" />
+        <Label id="title"
+            color="0xF2E3BCFF"
+            font="font:MediumBoldSystemFont"
+            translation="[24, 18]"
+            width="592" />
+        <Label id="subtitle"
+            color="0x96BBBBFF"
+            font="font:SmallSystemFont"
+            translation="[24, 62]"
+            width="592" />
+        <!-- Item rows, created on demand in onDataChange -->
+        <Group id="rowGroup" translation="[0, 108]" />
+    </children>
+    <script type="text/brightscript" uri="ChannelMenu.brs" />
+</component>

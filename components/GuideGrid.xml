@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="GuideGrid" extends="Group">
+    <interface>
+        <!-- guideData: { channels: [...], programs: {...} } -->
+        <field id="guideData"      type="assocarray" onChange="onDataChange" />
+        <!-- alwaysNotify: re-setting the same half hour (back from the player) still
+             resets the cursor to now. -->
+        <field id="windowStart"    type="integer"    value="0" onChange="onWindowChange" alwaysNotify="true" />
+        <field id="keyEvent"       type="assocarray" onChange="onKeyEventField" />
+        <field id="scrollToChannelId" type="string" value="" onChange="onScrollToChannelId" alwaysNotify="true" />
+        <!-- running: GuideScene clears it while the guide is hidden so the clock
+             and now-line timer stop; setting it again refreshes both at once. -->
+        <field id="running"        type="boolean"    value="true" onChange="onRunningChange" />
+        <!-- outputs -->
+        <field id="focusedProgram" type="assocarray" />
+        <field id="selectedChannel" type="assocarray" />
+    </interface>
+    <children>
+        <!-- Current time, in the channel column of the header row -->
+        <Label id="clock"
+            color="0xC19875FF"
+            font="font:SmallBoldSystemFont"
+            translation="[0, 0]"
+            width="200"
+            horizAlign="center" />
+
+        <!-- Time axis header -->
+        <Group id="timeHeader" translation="[200, 0]" />
+
+        <!-- Row container; y set in init from guideGeometry().headerH -->
+        <Group id="rowContainer" translation="[0, 40]" />
+
+        <!-- "Now" vertical line marker; y and height set in init from guideGeometry() -->
+        <Rectangle id="nowLine"
+            color="0xC19875CC"
+            width="2"
+            height="1080"
+            translation="[200, 40]"
+            visible="false" />
+
+        <!-- Drives the clock and the now line; see onTick -->
+        <Timer id="tickTimer" repeat="true" duration="5" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/RegistryUtils.brs" />
+    <script type="text/brightscript" uri="GuideGrid.brs" />
+</component>

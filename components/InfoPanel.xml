@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="InfoPanel" extends="Group">
+    <interface>
+        <field id="focusedProgram" type="assocarray" onChange="onDataChange" />
+        <!-- panelSize: { width, height }. GuideScene sets it to the space left of the
+             PIP and above the guide; text and description reflow to fill it. -->
+        <field id="panelSize" type="assocarray" onChange="onPanelSizeChange" />
+    </interface>
+    <children>
+        <Rectangle id="bg" color="0x2F3227DD" width="700" height="270" translation="[0, 0]" />
+
+        <Label id="chanName"
+            color="0xC19875FF"
+            font="font:SmallBoldSystemFont"
+            translation="[16, 12]"
+            width="680" />
+
+        <ScrollingLabel id="progTitle"
+            color="0xF2E3BCFF"
+            font="font:MediumBoldSystemFont"
+            translation="[16, 50]"
+            maxWidth="680"
+            scrollSpeed="60"
+            repeatCount="-1" />
+
+        <Label id="timeRange"
+            color="0x96BBBBFF"
+            font="font:SmallSystemFont"
+            translation="[16, 94]"
+            width="680" />
+
+        <!-- Description scrolls vertically inside this clipped group when it
+             overflows; see startDescScroll in InfoPanel.brs. -->
+        <Group id="descClip" translation="[16, 150]" clippingRect="[0, 0, 680, 60]">
+            <Label id="progDesc"
+                color="0x96BBBBFF"
+                font="font:SmallSystemFont"
+                translation="[0, 0]"
+                width="680"
+                numLines="0"
+                wrap="true" />
+        </Group>
+        <Animation id="descAnim" repeat="true" easeFunction="linear">
+            <Vector2DFieldInterpolator id="descInterp" fieldToInterp="progDesc.translation" />
+        </Animation>
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="InfoPanel.brs" />
+</component>

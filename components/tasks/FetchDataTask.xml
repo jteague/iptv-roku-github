@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="FetchDataTask" extends="Task">
+    <interface>
+        <!-- inputs: enabled sources in guide order (see RegistryUtils) -->
+        <field id="sources"  type="array" />
+        <field id="m3uOnly"  type="boolean" value="false" />
+        <!-- outputs -->
+        <field id="channels" type="array"      />
+        <field id="programs" type="assocarray" />
+        <field id="error"    type="string" value="" />
+        <!-- Per-source failure flags { <source id>: { m3u, epg } } so MainScene can keep
+             that source's previous data. epg is also set when the EPG was not fetched
+             (m3uOnly), but not when the source has no EPG URL. -->
+        <field id="failed"   type="assocarray" />
+        <!-- { fraction: 0..1, msg } for the loading screen. Downloads are 0..0.4 by files
+             finished (roUrlTransfer gives no byte counts); parsing is the rest, split by
+             each source's download size. -->
+        <field id="progress" type="assocarray" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/RegistryUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/M3UParser.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/XmltvParser.brs" />
+    <script type="text/brightscript" uri="FetchDataTask.brs" />
+</component>

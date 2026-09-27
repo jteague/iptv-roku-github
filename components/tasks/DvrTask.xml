@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="DvrTask" extends="Task">
+    <interface>
+        <!-- input: { base, apiKey, uuid, kind: "once" | "all" | "new", program: { title, start, stop, subtitle?, desc? } }
+             uuid is the Dispatcharr channel's uuid (end of its proxy stream URL). -->
+        <field id="request" type="assocarray" />
+        <!-- output: { ok, msg } -->
+        <field id="result"  type="assocarray" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/source/utils/DispatcharrApi.brs" />
+    <script type="text/brightscript" uri="DvrTask.brs" />
+</component>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="PlayerScene" extends="Group">
+    <interface>
+        <!-- input -->
+        <!-- alwaysNotify: the same URL / action can legitimately be sent twice in a row -->
+        <field id="channel"        type="assocarray" onChange="onChannelChange" />
+        <field id="refreshUrl"     type="string"     onChange="onRefreshUrl" alwaysNotify="true" />
+        <field id="focusedProgram" type="assocarray" onChange="onFocusedProgramChange" />
+        <!-- output -->
+        <field id="action" type="string" value="" alwaysNotify="true" />
+        <!-- called by MainScene via callFunc -->
+        <function name="showError" />
+    </interface>
+    <children>
+        <!-- Fullscreen video -->
+        <Video id="video"
+            width="1920"
+            height="1080"
+            translation="[0, 0]" />
+
+        <!-- Buffering spinner overlay -->
+        <Rectangle id="spinnerBg"
+            color="0x1F2119AA"
+            width="1920"
+            height="1080"
+            translation="[0,0]"
+            visible="false" />
+        <BusySpinner id="spinner"
+            translation="[916, 476]"
+            visible="false" />
+
+        <!-- Now playing info panel (shown on UP key) -->
+        <NowPlayingPanel id="nowPlayingPanel"
+            translation="[0, 660]"
+            visible="false" />
+        <Timer id="panelTimer" repeat="false" duration="10" />
+
+        <!-- Error message overlay -->
+        <Rectangle id="errBg"
+            color="0x1F2119CC"
+            width="1920"
+            height="1080"
+            translation="[0,0]"
+            visible="false" />
+        <Label id="errLabel"
+            color="0xC19875FF"
+            font="font:MediumBoldSystemFont"
+            translation="[560, 500]"
+            width="800"
+            horizAlign="center"
+            wrap="true"
+            visible="false" />
+    </children>
+    <script type="text/brightscript" uri="PlayerScene.brs" />
+</component>

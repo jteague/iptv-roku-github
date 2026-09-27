@@ -1,0 +1,16 @@
+{
+  "name": "iptv-roku",
+  "version": "1.0.0",
+  "description": "Native BrightScript/SceneGraph Roku app for watching live IPTV from an M3U playlist with XMLTV EPG guide.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "type": "commonjs",
+  "devDependencies": {
+    "brighterscript": "^0.71.1"
+  }
+}

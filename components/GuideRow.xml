@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="GuideRow" extends="Group">
+    <interface>
+        <!-- rowData: { channel, programs, windowStart } set together so the row builds once -->
+        <!-- layout: { windowMinutes, pxPerMin } set once by GuideGrid before rowData -->
+        <field id="layout"  type="assocarray" onChange="onLayoutChange" />
+        <field id="rowData" type="assocarray" onChange="onRowDataChange" />
+        <!-- selTime: epoch second of the guide cursor on this row; the cell covering
+             it is highlighted. -1 when the row is not focused. -->
+        <field id="selTime" type="integer"    value="-1" onChange="onSelTimeChange" />
+    </interface>
+    <children>
+        <!-- Program cells rendered in brs (lowest z-order) -->
+        <Group id="cellContainer" translation="[200, 0]" />
+
+        <!-- Channel info column renders last — always on top -->
+        <Rectangle id="chanBg"
+            color="0x414535FF"
+            width="200"
+            height="58"
+            translation="[0, 0]" />
+        <Poster id="logo"
+            width="40"
+            height="40"
+            translation="[8, 9]"
+            loadWidth="40"
+            loadHeight="40"
+            loadDisplayMode="scaleToFit"
+            loadingBitmapUri="pkg:/images/teague-vision.png"
+            failedBitmapUri="pkg:/images/teague-vision.png" />
+        <Label id="chanName"
+            color="0xF2E3BCFF"
+            font="font:SmallSystemFont"
+            width="140"
+            height="58"
+            vertAlign="center"
+            translation="[54, 0]" />
+    </children>
+    <script type="text/brightscript" uri="GuideRow.brs" />
+</component>

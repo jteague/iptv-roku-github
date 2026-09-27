@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="GuideScene" extends="Group">
+    <interface>
+        <!-- inputs -->
+        <!-- guideData: { channels: [...], programs: {...} } set together so the grid updates once -->
+        <field id="guideData"      type="assocarray" onChange="onDataChange" />
+        <field id="currentChannel" type="assocarray" onChange="onCurrentChannelChange" />
+        <field id="windowStart"    type="integer"    value="0" onChange="onWindowStartChange" alwaysNotify="true" />
+        <field id="scrollToChannelId" type="string" value="" onChange="onScrollToChannelId" alwaysNotify="true" />
+        <!-- in/out: active programme filter key ("" = all channels). MainScene sets it
+             before guideData and observes it to keep the choice across rebuilds. -->
+        <field id="filterKey"      type="string"     value="" />
+        <!-- outputs to MainScene -->
+        <field id="action"          type="string"    value="" alwaysNotify="true" />
+        <field id="selectedChannel" type="assocarray" />
+        <!-- long-press OK menu pick: { action, channel, program }; action is "hide", "fav_add", "fav_remove",
+             "remind_set", "remind_cancel", "record_once", "record_all" or "record_new" -->
+        <field id="menuAction"      type="assocarray" />
+        <!-- called by MainScene via callFunc -->
+        <function name="showToast" />
+    </interface>
+    <children>
+        <Rectangle id="bg" color="0x1F2119FF" width="1920" height="1080" translation="[0,0]" />
+
+        <!-- Info panel top-left -->
+        <InfoPanel id="infoPanel" translation="[0, 0]" />
+
+        <!-- PIP video top-right; size and position set in init from guideGeometry() -->
+        <Video id="pipVideo"
+            width="480"
+            height="270"
+            translation="[1440, 0]"
+            visible="false" />
+
+        <!-- Guide grid, bottom-anchored; y set in init from guideGeometry() -->
+        <GuideGrid id="guideGrid" translation="[0, 270]" />
+
+        <!-- Active programme filter, top-right of the info panel; placed and sized
+             in updateFilterPill -->
+        <Rectangle id="filterPill" color="0x618985FF" height="36" />
+        <Label id="filterPillLabel"
+            color="0xF2E3BCFF"
+            font="font:SmallSystemFont"
+            vertAlign="center"
+            height="36" />
+
+        <!-- "On now" filter list over the left of the guide, opened with replay -->
+        <FilterPicker id="filterPicker" visible="false" />
+
+        <!-- Long-press OK menu for the focused channel -->
+        <ChannelMenu id="channelMenu" visible="false" />
+
+        <!-- Starts on OK down; firing before OK up makes it a long press -->
+        <Timer id="okTimer" repeat="false" duration="0.8" />
+
+        <!-- Re-applies the active filter as shows start and end -->
+        <Timer id="filterTimer" repeat="true" duration="60" />
+
+        <!-- Toast for background errors -->
+        <Rectangle id="toastBg"
+            color="0xC19875EE"
+            width="600"
+            height="56"
+            translation="[660, 1000]"
+            visible="false" />
+        <Label id="toastLabel"
+            color="0x414535FF"
+            font="font:SmallSystemFont"
+            translation="[670, 1016]"
+            width="580"
+            visible="false" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/RegistryUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/ProgramFilters.brs" />
+    <script type="text/brightscript" uri="GuideScene.brs" />
+</component>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="NowPlayingPanel" extends="Group">
+    <interface>
+        <field id="focusedProgram" type="assocarray" onChange="onDataChange" />
+    </interface>
+    <children>
+        <Rectangle id="bg" color="0x2F3227EE" width="1920" height="420" translation="[0, 0]" />
+
+        <Label id="chanName"
+            color="0xC19875FF"
+            font="font:MediumBoldSystemFont"
+            translation="[40, 16]"
+            width="1840" />
+
+        <ScrollingLabel id="progTitle"
+            color="0xF2E3BCFF"
+            font="font:LargeBoldSystemFont"
+            translation="[40, 54]"
+            maxWidth="1840"
+            scrollSpeed="60"
+            repeatCount="-1" />
+
+        <Label id="timeRange"
+            color="0x96BBBBFF"
+            font="font:MediumSystemFont"
+            translation="[40, 108]"
+            width="1840" />
+
+        <!-- Description scrolls vertically inside this clipped group when it
+             overflows; see startDescScroll in InfoPanel.brs. -->
+        <Group id="descClip" translation="[40, 166]" clippingRect="[0, 0, 1840, 240]">
+            <Label id="progDesc"
+                color="0x96BBBBFF"
+                font="font:MediumSystemFont"
+                translation="[0, 0]"
+                width="1840"
+                numLines="0"
+                wrap="true" />
+        </Group>
+        <!-- Time until the panel auto-hides (Back closes the panel until then,
+             then goes back to the guide). Started by PlayerScene. -->
+        <CountdownRing id="countdown" translation="[1816, 20]" />
+
+        <Animation id="descAnim" repeat="true" easeFunction="linear">
+            <Vector2DFieldInterpolator id="descInterp" fieldToInterp="progDesc.translation" />
+        </Animation>
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/utils/DateUtils.brs" />
+    <!-- Same node ids and logic as InfoPanel; only the layout differs. -->
+    <script type="text/brightscript" uri="pkg:/components/InfoPanel.brs" />
+</component>
