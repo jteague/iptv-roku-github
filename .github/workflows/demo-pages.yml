@@ -1,0 +1,36 @@
+# Publishes demo/demo.m3u and a fresh demo EPG to GitHub Pages every day, for
+# Roku certification reviewers (and anyone trying the app without a provider).
+# Only runs on the public GitHub copy. Enable Pages with source "GitHub Actions".
+name: Demo playlist
+on:
+  push:
+    branches: [main]
+    paths: [demo/**, .github/workflows/demo-pages.yml]
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p site
+          cp demo/demo.m3u site/
+          python3 demo/make_epg.py > site/epg.xml
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

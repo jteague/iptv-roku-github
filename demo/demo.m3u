@@ -1,0 +1,11 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="nasa-tv" tvg-chno="1" group-title="Science",NASA TV
+https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8
+#EXTINF:-1 tvg-id="dw-english" tvg-chno="2" group-title="News",DW English
+https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8
+#EXTINF:-1 tvg-id="dw-espanol" tvg-chno="3" group-title="News",DW Español
+https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8
+#EXTINF:-1 tvg-id="akamai-test" tvg-chno="4" group-title="Test",Akamai Live Test
+https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
+#EXTINF:-1 tvg-id="unified-demo" tvg-chno="5" group-title="Test",Unified Streaming Demo
+https://demo.unified-streaming.com/k8s/live/stable/live.isml/.m3u8
