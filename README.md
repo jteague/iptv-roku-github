@@ -61,6 +61,21 @@ app at a time; uploading again replaces it.
 On first launch Settings opens. Under **IPTV Sources**, add a source with your M3U playlist URL and
 (optionally) its XMLTV guide URL, then **Save**.
 
+### No provider? Try the demo playlist
+
+Free public live streams with a made-up guide, republished daily (also what Roku's certification reviewers use):
+
+- M3U playlist: `https://jteague.github.io/iptv-roku-github/demo.m3u`
+- XMLTV guide: `https://jteague.github.io/iptv-roku-github/epg.xml`
+
+The guide then shows three channels: DW English, DW Español and Unified Streaming Demo. Deep links work with
+these channel ids: `curl -d '' "http://<roku-ip>:8060/launch/dev?contentId=dw-english&mediaType=live"`.
+
+| | |
+|---|---|
+| ![Demo source](screenshots/demo_edit_source.jpg) | ![Demo sources list](screenshots/demo_sources.jpg) |
+| ![Demo guide](screenshots/demo_guide.jpg) | ![Demo about](screenshots/demo_about.jpg) |
+
 ## Remote
 
 | Key | Guide | Player |
