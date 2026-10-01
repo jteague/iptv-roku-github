@@ -40,9 +40,11 @@ with a picture-in-picture preview and a fullscreen player. Written in plain Brig
 2. Accept the agreement, choose a **password**, and let the Roku restart.
 3. Note the Roku's IP address: **Settings → Network → About**.
 
-### 2. Build the package
+### 2. Get the package
 
-From the repo root:
+Download `guidebox.zip` from the latest [release](https://github.com/jteague/iptv-roku-github/releases/latest).
+
+Or build it from a clone, in the repo root:
 
 ```bash
 zip -r guidebox.zip manifest source components images
