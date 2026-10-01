@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           mkdir -p site
-          cp demo/demo.m3u demo/privacy.html site/
+          cp demo/demo.m3u demo/privacy.html demo/terms.html site/
           python3 demo/make_epg.py > site/epg.xml
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
