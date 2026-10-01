@@ -30,8 +30,8 @@ with a picture-in-picture preview and a fullscreen player. Written in plain Brig
 
 ## Install
 
-> **Note:** Roku doesn't accept IPTV player apps into its Channel Store, so GuideBox can't be published
-> there. The only way to install it is to turn on developer mode and sideload it, as below.
+> **Note:** GuideBox is being submitted to the Roku Channel Store. Until it's listed there, install it by
+> turning on developer mode and sideloading it, as below.
 
 ### 1. Turn on developer mode
 
