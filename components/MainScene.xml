@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene">
+    <interface>
+        <!-- main.brs: launch args or an roInput event, { contentId, mediaType } -->
+        <field id="deepLink" type="assocarray" onChange="onDeepLink" />
+        <!-- set when the user confirms Exit; main.brs ends the app -->
+        <field id="exitApp"  type="boolean" alwaysNotify="true" />
+    </interface>
     <children>
         <!-- Loading screen -->
         <Rectangle id="loadingBg"
@@ -9,7 +15,7 @@
             translation="[0,0]"
             visible="true" />
         <Label id="loadingTitle"
-            text="Teague Vision"
+            text="GuideBox"
             font="font:LargeBoldSystemFont"
             color="0xF2E3BCFF"
             horizAlign="center"

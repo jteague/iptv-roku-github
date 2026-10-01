@@ -15,6 +15,7 @@ sub init()
         { group: "pageSources", rows: [] },
         { group: "pageGuide",   rows: [["guideHoursChooser"], ["guideRowsChooser"]] },
         { group: "pageOptions", rows: [["intervalInput"], ["launchChooser"]] },
+        { group: "pageRemote",  rows: [] },
         { group: "pageHidden",  rows: [] },
         { group: "pageAbout",   rows: [] }
     ]
@@ -98,8 +99,52 @@ sub init()
     setChooserValue("guideRowsChooser", settings.guideRows.toStr())
     setChooserValue("launchChooser", settings.onLaunch)
 
+    renderRemote()
     showPage(0)
     focusNav()
+end sub
+
+' Remote page: fixed key / action rows. Keep in step with the key handlers in
+' GuideScene, GuideGrid, PlayerScene, ChannelMenu and FilterPicker.
+sub renderRemote()
+    addKeyRows("remoteGuide", [
+        ["Up / Down", "Move between channels"],
+        ["Left / Right", "Previous / next show"],
+        ["Rewind / Fwd", "Page up / page down"],
+        ["OK", "Watch fullscreen"],
+        ["Hold OK", "Channel menu"],
+        ["Replay", "Filter the guide"],
+        ["*", "Settings"],
+        ["Back", "Exit or keep watching"]
+    ])
+    addKeyRows("remotePlayer", [
+        ["Up", "What's on now"],
+        ["Down", "Previous channel"],
+        ["Back", "Back to the guide"],
+        ["*", "Roku captions and audio"]
+    ])
+    addKeyRows("remoteMenus", [
+        ["OK", "Choose"],
+        ["Back", "Close or go back"]
+    ])
+end sub
+
+sub addKeyRows(groupId as string, rows as object)
+    group = m.top.findNode(groupId)
+    for i = 0 to rows.count() - 1
+        keyLabel = group.createChild("Label")
+        keyLabel.font = "font:SmallBoldSystemFont"
+        keyLabel.color = "0xF2E3BCFF"
+        keyLabel.width = 210
+        keyLabel.translation = [0, i * 46]
+        keyLabel.text = rows[i][0]
+        actionLabel = group.createChild("Label")
+        actionLabel.font = "font:SmallSystemFont"
+        actionLabel.color = "0x96BBBBFF"
+        actionLabel.width = 400
+        actionLabel.translation = [220, i * 46]
+        actionLabel.text = rows[i][1]
+    end for
 end sub
 
 ' ── Nav / page switching ─────────────────────────────────────────────────────
@@ -117,8 +162,8 @@ sub showPage(idx as integer)
         m.top.findNode("pageSourceEdit").visible = false
     end if
     if idx = 0 and m.editIdx < 0 then renderSourceList()
-    if idx = 3 then renderHiddenList()
-    if idx = 4 then renderAbout()
+    if idx = 4 then renderHiddenList()
+    if idx = 5 then renderAbout()
     styleNav()
 end sub
 
@@ -163,7 +208,7 @@ function currentRows() as object
             rows.push(["src", "srcUp", "srcDown"])
         end for
         rows.push(["addBtn"])
-    else if m.pageIdx = 3
+    else if m.pageIdx = 4
         for each e in m.hidden
             if e.kind = "codec"
                 rows.push(["hidUnhide", "hidRetry", "hidPerm"])
@@ -186,7 +231,7 @@ end function
 
 ' True when the focused row is a hidden channel; rowIdx is its index in m.hidden.
 function onHiddenRow() as boolean
-    return m.area = "content" and m.pageIdx = 3 and m.rowIdx < m.hidden.count()
+    return m.area = "content" and m.pageIdx = 4 and m.rowIdx < m.hidden.count()
 end function
 
 ' ── Content focus ────────────────────────────────────────────────────────────
@@ -219,7 +264,7 @@ sub focusItem(rowIdx as integer, colIdx as integer)
         if target < m.listTop then m.listTop = target
         if target >= m.listTop + m.maxListRows then m.listTop = target - m.maxListRows + 1
         renderSourceList()
-    else if m.pageIdx = 3
+    else if m.pageIdx = 4
         target = rowIdx
         if target > m.hidden.count() - 1 then target = m.hidden.count() - 1
         if target < m.hiddenTop then m.hiddenTop = target

@@ -26,8 +26,8 @@
             loadWidth="40"
             loadHeight="40"
             loadDisplayMode="scaleToFit"
-            loadingBitmapUri="pkg:/images/teague-vision.png"
-            failedBitmapUri="pkg:/images/teague-vision.png" />
+            loadingBitmapUri="pkg:/images/guidebox.png"
+            failedBitmapUri="pkg:/images/guidebox.png" />
         <Label id="chanName"
             color="0xF2E3BCFF"
             font="font:SmallSystemFont"

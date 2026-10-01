@@ -1,4 +1,4 @@
-# Teague Vision
+# GuideBox
 
 A live TV guide for Roku. Point it at an M3U playlist and an XMLTV guide and you get a channel guide
 with a picture-in-picture preview and a fullscreen player. Written in plain BrightScript / SceneGraph.
@@ -30,7 +30,7 @@ with a picture-in-picture preview and a fullscreen player. Written in plain Brig
 
 ## Install
 
-> **Note:** Roku doesn't accept IPTV player apps into its Channel Store, so Teague Vision can't be published
+> **Note:** Roku doesn't accept IPTV player apps into its Channel Store, so GuideBox can't be published
 > there. The only way to install it is to turn on developer mode and sideload it, as below.
 
 ### 1. Turn on developer mode
@@ -45,13 +45,13 @@ with a picture-in-picture preview and a fullscreen player. Written in plain Brig
 From the repo root:
 
 ```bash
-zip -r teague-vision.zip manifest source components images
+zip -r guidebox.zip manifest source components images
 ```
 
 ### 3. Upload it
 
 1. In a browser, open `http://<roku-ip>` and log in as `rokudev` with your password.
-2. Choose **Upload**, pick `teague-vision.zip`, then **Install with zip**.
+2. Choose **Upload**, pick `guidebox.zip`, then **Install with zip**.
 
 The app starts right away and stays on the home screen as the dev channel. A Roku holds one sideloaded
 app at a time; uploading again replaces it.
@@ -110,5 +110,5 @@ npx bsc --rootDir . --createPackage false --copyToStaging false \
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE). You're free to use, change and share Teague Vision for any
+[PolyForm Noncommercial 1.0.0](LICENSE). You're free to use, change and share GuideBox for any
 noncommercial purpose. Selling it, or anything built from it, is not allowed.

@@ -17,11 +17,25 @@ node_modules/.bin/bsc --rootDir . --createPackage false --copyToStaging false \
   --files manifest "source/**/*.brs" "components/**/*.brs" "components/**/*.xml"
 
 # Manual deploy: zip and upload via http://<roku-ip> (user rokudev, your dev password)
-zip -r teague-vision.zip manifest source components images
+zip -r guidebox.zip manifest source components images
 
 # Debug console (print output)
 telnet <roku-ip> 8085
 ```
+
+## Roku certification
+
+Kept store-ready (Roku's certification criteria), so don't regress these.
+- Manifest: `rsg_version=1.3` (required from 2026-10-01), `supports_input_launch=1`, focus icons 290x218 (hd) and
+  540x405 (fhd), colours clamped to broadcast-safe 16..235. Bump `build_version` for every submitted build.
+- `AppLaunchComplete` beacon (`launchComplete`, MainScene) fires once when the guide, Settings or the error screen is
+  first up; an error dialog before it is wrapped in `AppDialogInitiate`/`AppDialogComplete`.
+- Back must lead out of the app: the guide is the home screen, and Back there opens MainScene's exit dialog
+  ("Watch <channel>" / Exit, or Exit / Cancel). It never jumps straight back to the player.
+- Deep links: `contentId` is a channel id, with or without the `<source>_` prefix (`applyDeepLink`); the channel
+  plays fullscreen over the guide. Test with `curl -d '' "http://<roku-ip>:8060/launch/dev?contentId=dw-english&mediaType=live"`.
+- `demo/`: a playlist of legal public live streams + `make_epg.py` (made-up 4-day XMLTV).
+  `.github/workflows/demo-pages.yml` republishes them to Pages daily; give those URLs to certification reviewers.
 
 ## Resolution: fhd only, always
 
@@ -34,7 +48,8 @@ telnet <roku-ip> 8085
 ## Architecture
 
 ```
-source/main.brs                 roSGScreen bootstrap only
+source/main.brs                 roSGScreen bootstrap; passes deep links (launch args `contentId`, roInput) to
+                                MainScene.deepLink and ends the app when MainScene sets `exitApp`
 source/utils/M3UParser.brs      #EXTINF → { id, number, name, logoUrl, group, streamUrl } (group = group-title, "" if none)
 source/utils/XmltvParser.brs    XMLTV → programs keyed by channel id, sorted by start; keeps subtitle/rating/episode/year/genres,
                                 plus `cats` (every category, lowercased, "|a|b|") for the filters
@@ -68,7 +83,7 @@ components/GuideScene           guide grid (bottom-anchored) + InfoPanel (top-le
                                 channel instead, and the pick goes to MainScene as `menuAction` { action, channel }
 components/ChannelMenu          long-press OK popup (centred, sized to its items): "Record…" (only for a show that hasn't ended
                                 on a source with a Dispatcharr `apiKey`, `guideData.dvr`), "Set/Cancel Reminder" (only for a
-                                show that hasn't started), "Add to/Remove from Favorites", "Hide Channel" and "Filter…" (opens FilterPicker; handled in GuideScene). "Record…" reopens
+                                show that hasn't started), "Add to/Remove from Favorites", "Hide Channel", "Filter…" (opens FilterPicker) and "Settings…" (same as *; both handled in GuideScene). "Record…" reopens
                                 it as This Episode / Series: All / Series: New. Keys forwarded via `keyEvent`; emits `chosen`
                                 and hides itself
 components/FilterPicker         filter list over the left of the guide (rows aligned with guide rows, pooled, scrolls);
@@ -82,13 +97,13 @@ components/GuideRow             one channel row; pooled program cells; highlight
 components/PlayerScene          fullscreen Video, NowPlayingPanel on Up (10s auto-hide), retry/blacklist logic
 components/CountdownRing        64px ring of 40 ticks that go dark clockwise + seconds left; NowPlayingPanel's
                                 auto-hide countdown (visual only; PlayerScene's panelTimer still hides the panel)
-components/SettingsScene        left nav (IPTV Sources / Guide / Options / Hidden Channels / About) + content pages; source list with
+components/SettingsScene        left nav (IPTV Sources / Guide / Options / Remote / Hidden Channels / About) + content pages; source list with
                                 a per-source editor page; KeyboardDialog for text entry. Hidden Channels lists both kinds
                                 (colour strip + status: Deep Teal "Hidden by you", Camel "Unsupported, N days left"), pooled
                                 rows like the source list; Unhide / Hide Permanently / Unhide All write the registry at
                                 once rather than on Save. Retry (codec rows) plays the stream in a preview overlay
                                 (`streamUrls` from MainScene; 2 attempts, 20s timeout): playing → unhidden, else it stays. Back from the nav with edits pending (`hasUnsavedChanges`,
-                                compares against the registry) asks Save / Discard / Keep Editing. About is read-only:
+                                compares against the registry) asks Save / Discard / Keep Editing. Remote is a read-only key reference (`renderRemote`; update it when a key handler changes). About is read-only:
                                 roAppInfo/roDeviceInfo plus the `epgInfo` field MainScene sets
 components/tasks/FetchDataTask  parallel HTTP fetch of every enabled source, parse, per-source failure flags;
                                 `progress` { fraction, msg } drives the loading-screen bar (foreground fetch only)

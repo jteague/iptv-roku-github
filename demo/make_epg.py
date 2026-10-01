@@ -7,15 +7,12 @@ from datetime import datetime, timedelta, timezone
 from xml.sax.saxutils import escape
 
 DAYS = 4
-DESC = "Demo guide data for testing Teague Vision. The live stream plays whatever is on air."
+DESC = "Demo guide data for testing GuideBox. The live stream plays whatever is on air."
 
 # channel id, display name, [(minutes, title, category)] repeated through the day
 CHANNELS = [
-    ("nasa-tv", "NASA TV", [(60, "NASA Live", "Science"), (30, "Space Station Views", "Science"),
-                            (30, "NASA Science", "Documentary")]),
     ("dw-english", "DW English", [(30, "DW News", "News"), (30, "Focus on Europe", "Documentary")]),
     ("dw-espanol", "DW Español", [(30, "DW Noticias", "News"), (30, "Enfoque Europa", "Documentary")]),
-    ("akamai-test", "Akamai Live Test", [(60, "Live Test Stream", "Technology")]),
     ("unified-demo", "Unified Streaming Demo", [(60, "Live Demo Stream", "Technology")]),
 ]
 
@@ -27,7 +24,7 @@ def ts(t):
 def main():
     start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     end = start + timedelta(days=DAYS)
-    out = ['<?xml version="1.0" encoding="UTF-8"?>', '<tv generator-info-name="teague-vision-demo">']
+    out = ['<?xml version="1.0" encoding="UTF-8"?>', '<tv generator-info-name="guidebox-demo">']
     for cid, name, _ in CHANNELS:
         out.append(f'  <channel id="{cid}"><display-name>{escape(name)}</display-name></channel>')
     for cid, _, blocks in CHANNELS:

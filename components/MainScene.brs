@@ -25,6 +25,9 @@ sub init()
     m.guideFocusId = ""   ' channel the next openGuide puts the cursor on
     m.launched = false    ' the first guide open applies the "on launch" setting
     m.guideFilter = ""   ' guide "on now" filter key, kept across GuideScene rebuilds
+    m.launchSignalled = false   ' AppLaunchComplete beacon sent (launchComplete)
+    m.pendingLink = invalid     ' deep link waiting for channels (applyDeepLink)
+    m.exitDialog  = invalid
     ' Dispatcharr recordings (RecordingsTask): { "<source prefix><channel uuid>": [ { start, stop } ] }.
     ' markRecordings sets rec = true on the programmes they cover; recMarked lists them for clearing.
     m.recordings = {}
@@ -122,6 +125,7 @@ sub showInitialError(msg as string)
     m.retryBtnLabel.visible = true
     m.errorHint.visible     = true
     m.top.setFocus(true)
+    launchComplete()
 end sub
 
 sub hideError()
@@ -130,6 +134,14 @@ sub hideError()
     m.retryBtn.visible      = false
     m.retryBtnLabel.visible = false
     m.errorHint.visible     = false
+end sub
+
+' First interactive screen (guide, Settings or the error screen) is up: tell
+' Roku the launch is over. Certification times launch to this beacon (15s max).
+sub launchComplete()
+    if m.launchSignalled then return
+    m.launchSignalled = true
+    m.top.signalBeacon("AppLaunchComplete")
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
@@ -176,6 +188,7 @@ sub openSettings()
     if m.playerScene <> invalid then m.playerScene.visible = false
     hideLoading()
     hideError()
+    launchComplete()
 end sub
 
 sub onSettingsAction()
@@ -286,6 +299,7 @@ sub finishFetch()
     if m.refreshTask = invalid
         startRefreshTimer()
     end if
+    applyDeepLink()
 end sub
 
 ' Combine a completed FetchDataTask with the data already loaded. A source whose
@@ -612,11 +626,14 @@ sub showErrorDialog(msg as string)
     dialog.message = msg
     dialog.buttons = ["OK"]
     dialog.observeField("buttonSelected", "onErrorDialogClose")
+    ' A dialog before the launch beacon has to be bracketed by these two.
+    if not m.launchSignalled then m.top.signalBeacon("AppDialogInitiate")
     m.top.dialog = dialog
 end sub
 
 sub onErrorDialogClose()
     m.top.dialog = invalid
+    if not m.launchSignalled then m.top.signalBeacon("AppDialogComplete")
     action = m.afterDialogAction
     m.afterDialogAction = ""
     if action = "openGuide"
@@ -651,17 +668,99 @@ sub openGuide()
     if m.playerScene <> invalid then m.playerScene.visible = false
     hideLoading()
     hideError()
+    launchComplete()
 end sub
 
 sub onGuideAction()
     action = m.guideScene.action
     if action = "openSettings"
         openSettings()
-    else if action = "backToPlayer"
+    else if action = "back"
+        showExitDialog()
+    end if
+end sub
+
+' Back in the guide. The guide is the home screen, so Back offers to exit
+' (certification 4.6: Back must lead out of the app, never loop guide <-> player).
+' With a channel in the PIP the first button goes back to it fullscreen.
+sub showExitDialog()
+    if m.top.dialog <> invalid then return
+    dialog = CreateObject("roSGNode", "Dialog")
+    dialog.title = "Exit GuideBox?"
+    if m.currentChannel <> invalid
+        dialog.buttons = ["Watch " + m.currentChannel.name, "Exit"]
+    else
+        dialog.buttons = ["Exit", "Cancel"]
+    end if
+    m.exitDialog = dialog
+    dialog.observeField("buttonSelected", "onExitButton")
+    dialog.observeField("wasClosed", "closeExitDialog")
+    m.top.dialog = dialog
+end sub
+
+sub onExitButton()
+    dialog = m.exitDialog
+    if dialog = invalid then return
+    label = dialog.buttons[dialog.buttonSelected]
+    closeExitDialog()
+    if label = "Exit"
+        m.top.exitApp = true
+    else if label <> "Cancel" and m.currentChannel <> invalid
         ' The player stopped its video when it handed off to the guide (only one
         ' decoder is available and PIP needs it), so playback must be restarted.
-        if m.currentChannel <> invalid then showPlayer(m.currentChannel)
+        showPlayer(m.currentChannel)
     end if
+end sub
+
+' Back on the dialog is the same as Cancel.
+sub closeExitDialog()
+    dialog = m.exitDialog
+    if dialog = invalid then return
+    m.exitDialog = invalid
+    dialog.unobserveField("buttonSelected")
+    dialog.unobserveField("wasClosed")
+    m.top.dialog = invalid
+    if m.guideScene <> invalid and m.guideScene.visible then m.guideScene.setFocus(true)
+end sub
+
+' ── Deep linking ─────────────────────────────────────────────────────────────
+
+' Launch args or roInput (main.brs). contentId is a channel id, with or without
+' its "<source>_" prefix, so a playlist's own tvg-id works (e.g. "dw-english").
+sub onDeepLink()
+    link = m.top.deepLink
+    if link = invalid or link.contentId = invalid then return
+    print "[MainScene] deep link " + link.contentId.toStr()
+    m.pendingLink = link
+    ' Mid-fetch or first launch: finishFetch applies it once channels are in.
+    if m.activeFetch = invalid and m.channels.count() > 0 then applyDeepLink()
+end sub
+
+' Plays the linked channel fullscreen over the guide, so Back lands on the guide.
+' An unknown id just leaves the guide up.
+sub applyDeepLink()
+    link = m.pendingLink
+    if link = invalid then return
+    m.pendingLink = invalid
+    id = link.contentId.toStr()
+    ch = invalid
+    for each c in m.channels
+        if c.id = id or Mid(c.id, Instr(1, c.id, "_") + 1) = id
+            ch = c
+            exit for
+        end if
+    end for
+    if ch = invalid
+        print "[MainScene] deep link: no channel " + id
+        return
+    end if
+    if m.settingsScene <> invalid
+        m.top.removeChild(m.settingsScene)
+        m.settingsScene = invalid
+    end if
+    closeExitDialog()
+    if m.guideScene = invalid or not m.guideScene.visible then openGuide()
+    openPlayer(ch)
 end sub
 
 ' Long-press OK menu in the guide: { action, channel }.

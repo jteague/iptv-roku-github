@@ -56,27 +56,38 @@
             vertAlign="center"
             translation="[70, 384]" />
 
-        <!-- nav item 3: Hidden Channels -->
+        <!-- nav item 3: Remote -->
         <Rectangle id="navBg3" color="0x00000000" width="380" height="80" translation="[30, 476]" />
         <Rectangle id="navBar3" color="0x96BBBBFF" width="6" height="80" translation="[30, 476]" visible="false" />
         <Label id="navLabel3"
-            text="Hidden Channels"
+            text="Remote"
             font="font:MediumBoldSystemFont"
             color="0x96BBBBFF"
             width="320" height="80"
             vertAlign="center"
             translation="[70, 476]" />
 
-        <!-- nav item 4: About -->
+        <!-- nav item 4: Hidden Channels -->
         <Rectangle id="navBg4" color="0x00000000" width="380" height="80" translation="[30, 568]" />
         <Rectangle id="navBar4" color="0x96BBBBFF" width="6" height="80" translation="[30, 568]" visible="false" />
         <Label id="navLabel4"
-            text="About"
+            text="Hidden Channels"
             font="font:MediumBoldSystemFont"
             color="0x96BBBBFF"
             width="320" height="80"
             vertAlign="center"
             translation="[70, 568]" />
+
+        <!-- nav item 5: About -->
+        <Rectangle id="navBg5" color="0x00000000" width="380" height="80" translation="[30, 660]" />
+        <Rectangle id="navBar5" color="0x96BBBBFF" width="6" height="80" translation="[30, 660]" visible="false" />
+        <Label id="navLabel5"
+            text="About"
+            font="font:MediumBoldSystemFont"
+            color="0x96BBBBFF"
+            width="320" height="80"
+            vertAlign="center"
+            translation="[70, 660]" />
 
         <Label id="navHint"
             text="Back returns to the guide"
@@ -198,7 +209,7 @@
                 horizAlign="center" vertAlign="center"
                 translation="[1312, 640]" />
 
-            <Label text="Rewrite .ts streams to HLS (ErsatzTV)"
+            <Label text="Rewrite .ts to HLS (ErsatzTV)"
                 font="font:SmallBoldSystemFont"
                 color="0xF2E3BCFF"
                 width="560" height="56"
@@ -229,11 +240,11 @@
                 width="200" height="56"
                 horizAlign="center" vertAlign="center"
                 translation="[500, 796]" />
-            <Rectangle id="removeBtn" color="0xC19875FF" width="240" height="56" translation="[724, 796]" />
+            <Rectangle id="removeBtn" color="0xC19875FF" width="280" height="56" translation="[724, 796]" />
             <Label id="removeBtnLabel" text="Remove Source"
                 color="0x414535FF"
                 font="font:SmallBoldSystemFont"
-                width="240" height="56"
+                width="280" height="56"
                 horizAlign="center" vertAlign="center"
                 translation="[724, 796]" />
         </Group>
@@ -324,7 +335,7 @@
                 width="60" height="56"
                 horizAlign="center" vertAlign="center"
                 translation="[830, 532]" />
-            <Label text="Fewer rows make the guide shorter and the picture above it larger."
+            <Label text="Fewer rows make the picture above the guide larger."
                 font="font:SmallSystemFont"
                 color="0x96BBBBAA"
                 width="920" height="56"
@@ -359,7 +370,7 @@
                 translation="[536, 294]"
                 text="120"
                 maxTextLength="5" />
-            <Label text="Playlists and EPG data are re-downloaded in the background on this schedule."
+            <Label text="Playlists and guide data re-download in the background."
                 font="font:SmallSystemFont"
                 color="0x96BBBBAA"
                 width="1000" height="60"
@@ -387,19 +398,53 @@
                 translation="[530, 532]" />
             <Rectangle id="launchPill1" color="0x414535FF" width="300" height="56" translation="[782, 532]" />
             <Label id="launchPillLabel1"
-                text="Resume last channel"
+                text="Last channel"
                 font="font:SmallBoldSystemFont"
                 color="0x96BBBBFF"
                 width="300" height="56"
                 horizAlign="center" vertAlign="center"
                 translation="[782, 532]" />
-            <Label text="Resume plays the last channel you watched in the picture-in-picture window."
+            <Label text="Last channel plays the channel you watched last in the picture-in-picture window."
                 font="font:SmallSystemFont"
                 color="0x96BBBBAA"
-                width="740" height="56"
+                width="730" height="80"
                 wrap="true"
                 vertAlign="center"
-                translation="[1110, 532]" />
+                translation="[1110, 520]" />
+        </Group>
+
+        <!-- ── Page: Remote ─────────────────────────────────────────────── -->
+        <!-- Read-only key reference; the key / action rows are built by renderRemote. -->
+        <Group id="pageRemote" visible="false">
+            <Label text="Remote"
+                font="font:LargeBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[500, 70]" />
+            <Label text="What each button on the Roku remote does."
+                font="font:SmallSystemFont"
+                color="0x96BBBBAA"
+                translation="[500, 128]" />
+
+            <Rectangle color="0x2F3227FF" width="670" height="470" translation="[500, 190]" />
+            <Label text="In the guide"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[530, 212]" />
+            <Group id="remoteGuide" translation="[530, 266]" />
+
+            <Rectangle color="0x2F3227FF" width="670" height="270" translation="[1190, 190]" />
+            <Label text="Watching fullscreen"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[1220, 212]" />
+            <Group id="remotePlayer" translation="[1220, 266]" />
+
+            <Rectangle color="0x2F3227FF" width="670" height="180" translation="[1190, 480]" />
+            <Label text="In menus and Settings"
+                font="font:MediumBoldSystemFont"
+                color="0xF2E3BCFF"
+                translation="[1220, 502]" />
+            <Group id="remoteMenus" translation="[1220, 556]" />
         </Group>
 
         <!-- ── Page: Hidden Channels ────────────────────────────────────── -->
@@ -409,7 +454,7 @@
                 font="font:LargeBoldSystemFont"
                 color="0xF2E3BCFF"
                 translation="[500, 70]" />
-            <Label text="Hidden with a long press of OK in the guide, or because the stream's codec is unsupported (back after 14 days). Changes apply right away."
+            <Label text="Hidden by you (hold OK in the guide), or for an unsupported codec (back after 14 days)."
                 font="font:SmallSystemFont"
                 color="0x96BBBBAA"
                 width="1360"

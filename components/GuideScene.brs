@@ -282,6 +282,7 @@ sub openChannelMenu()
     end if
     items.push({ key: "hide", label: "Hide Channel" })
     items.push({ key: "filter", label: "Filter…" })
+    items.push({ key: "settings", label: "Settings…" })
     showChannelMenu(ch.name, subtitle, items)
 end sub
 
@@ -328,6 +329,13 @@ sub onMenuChosen()
     if action = "filter"
         m.menuProgram = invalid
         openFilterPicker()
+        return
+    end if
+    ' Settings… is the route that doesn't need * (Roku reserves * during playback,
+    ' and the PIP may be playing).
+    if action = "settings"
+        m.menuProgram = invalid
+        m.top.action = "openSettings"
         return
     end if
     m.top.menuAction = { action: action, channel: ch, program: m.menuProgram }
@@ -404,11 +412,8 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return true
     end if
     if key = "back"
-        if m.top.currentChannel <> invalid and m.top.currentChannel.streamUrl <> ""
-            m.top.action = "backToPlayer"
-            return true
-        end if
-        return false
+        m.top.action = "back"   ' MainScene asks whether to exit
+        return true
     end if
     if key = "options"
         m.top.action = "openSettings"
