@@ -31,7 +31,7 @@ Kept store-ready (Roku's certification criteria), so don't regress these.
 - Deep links with no playlist added play the built-in sample (`SAMPLE_ID` "big-buck-bunny", MainScene): Big Buck Bunny,
   CC BY 3.0, built by `demo/make_sample.sh` and published with the demo playlist (`demo/sample.html` has the credit).
   Roku's automated deep-link and play-performance tests run on a clean install and depend on it.
-- Manifest: `rsg_version=1.3` (required from 2026-10-01), `supports_input_launch=1`, `minimum_firmware_version=15.0` (Roku compares major and minor separately, so 15.1 refuses OS 16.0.x), focus icons 290x218 (hd) and
+- Manifest: `rsg_version=1.3` (required from 2026-10-01), `supports_input_launch=1`, `minimum_firmware_version=15.0` (the install check compares major and minor separately, so 15.1 refuses OS 16.0.x; the Developer Dashboard's own field is 15.1, as its RSG 1.3 check asks), focus icons 290x218 (hd) and
   540x405 (fhd), colours clamped to broadcast-safe 16..235. Bump `build_version` for every submitted build.
 - `AppLaunchComplete` beacon (`launchComplete`, MainScene) fires once when the guide, Settings or the error screen is
   first up; an error dialog before it is wrapped in `AppDialogInitiate`/`AppDialogComplete`.
