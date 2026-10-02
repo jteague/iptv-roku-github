@@ -36,6 +36,10 @@ sub init()
     m.dvrTask    = invalid
     ' Series rules are evaluated on Dispatcharr's side after the POST returns, so
     ' look again shortly after a record request.
+    m.exitSoonTimer = m.top.createChild("Timer")
+    m.exitSoonTimer.repeat   = false
+    m.exitSoonTimer.duration = 0.1
+    m.exitSoonTimer.observeField("fire", "showExitDialog")
     m.recSoonTimer = m.top.createChild("Timer")
     m.recSoonTimer.repeat   = false
     m.recSoonTimer.duration = 10
@@ -219,8 +223,11 @@ sub onSettingsAction()
         ' Cancelled after a failed fetch: back to the error screen, the only way
         ' on from there (Retry or Settings again).
         if m.channels.count() = 0 and enabledSources(readSettings()).count() = 0
+            ' Next tick: Discard on Settings' unsaved-changes dialog gets here
+            ' while that dialog is still closing, and its close would take the
+            ' exit dialog down with it.
             openSettings()
-            showExitDialog()
+            m.exitSoonTimer.control = "start"
         else if m.channels.count() = 0
             msg = m.pendingErrorMsg
             if msg = "" then msg = "No channels loaded."
@@ -743,9 +750,11 @@ sub onDeepLink()
     if link = invalid or link.contentId = invalid then return
     print "[MainScene] deep link " + link.contentId.toStr()
     m.pendingLink = link
-    ' Mid-fetch or first launch: finishFetch applies it once channels are in.
-    ' With no source enabled no fetch is coming, so apply it now (the sample).
-    if m.activeFetch = invalid and (m.channels.count() > 0 or enabledSources(readSettings()).count() = 0) then applyDeepLink()
+    ' Mid-fetch or first launch: finishFetch applies it once channels are in, as
+    ' does OK on the Connection Error dialog. The sample needs no channels, so it
+    ' plays right away whenever no fetch is running (first run, error screen).
+    if m.activeFetch <> invalid or m.afterDialogAction <> "" then return
+    if m.channels.count() > 0 or link.contentId.toStr() = SAMPLE_ID() or enabledSources(readSettings()).count() = 0 then applyDeepLink()
 end sub
 
 ' Plays the linked channel fullscreen over the guide, so Back lands on the guide.
@@ -767,19 +776,24 @@ sub applyDeepLink()
         print "[MainScene] deep link: no channel " + id
         return
     end if
+    ' Close any dialog first: the exit and reminder dialogs, or one of
+    ' Settings' (keyboard, unsaved changes), which would stay over the player.
+    closeExitDialog()
+    closeReminderDialog()
+    if m.top.dialog <> invalid
+        m.top.dialog.close = true
+        m.top.dialog = invalid
+    end if
     if m.settingsScene <> invalid
         m.top.removeChild(m.settingsScene)
         m.settingsScene = invalid
     end if
-    closeExitDialog()
     if ch.id = SAMPLE_ID()
-        ' Not a guide channel: no guide behind it and not remembered as last channel.
+        ' Not a guide channel: no guide behind it.
         hideLoading()
         hideError()
         launchComplete()
-        m.previousChannel = m.currentChannel
-        m.currentChannel  = ch
-        showPlayer(ch)
+        openPlayer(ch)
         return
     end if
     if m.guideScene = invalid or not m.guideScene.visible then openGuide()
@@ -795,6 +809,11 @@ end sub
 ' and published with the demo playlist. It plays whole and loops, credits included.
 function SAMPLE_ID() as string
     return "big-buck-bunny"
+end function
+
+function isSample(ch as dynamic) as boolean
+    if ch = invalid then return false
+    return ch.id = SAMPLE_ID()
 end function
 
 function sampleChannel() as object
@@ -888,9 +907,10 @@ end sub
 ' ── Player ───────────────────────────────────────────────────────────────────
 
 sub openPlayer(ch as object)
-    m.previousChannel = m.currentChannel
-    m.currentChannel  = ch
-    saveLastChannelId(ch.id)
+    ' The built-in sample is never the previous or the remembered channel.
+    if not isSample(m.currentChannel) then m.previousChannel = m.currentChannel
+    m.currentChannel = ch
+    if not isSample(ch) then saveLastChannelId(ch.id)
     showPlayer(ch)
 end sub
 
@@ -935,9 +955,11 @@ sub onPlayerAction()
         if m.currentChannel <> invalid then m.playerScene.focusedProgram = buildFocusedProgram(m.currentChannel)
     else if action = "backToGuide"
         ' The sample never goes in the guide's PIP.
-        if m.currentChannel <> invalid and m.currentChannel.id = SAMPLE_ID() then m.currentChannel = m.previousChannel
+        if isSample(m.currentChannel) then m.currentChannel = m.previousChannel
         if m.channels.count() = 0
-            ' The sample with no playlist yet: back to where a first run starts.
+            ' The sample with nothing loaded: back to where a first run starts
+            ' (Settings), or a fresh try at the sources (error screen before).
+            m.playerScene.visible = false
             checkSettingsAndStart()
         else if m.guideScene = invalid
             openGuide()
@@ -959,7 +981,7 @@ sub onPlayerAction()
         if m.previousChannel <> invalid
             openPlayer(m.previousChannel)
         end if
-    else if action = "tokenExpired" and m.currentChannel <> invalid and m.currentChannel.id = SAMPLE_ID()
+    else if action = "tokenExpired" and isSample(m.currentChannel)
         m.playerScene.callFunc("showError", "The sample isn't available right now.")
     else if action = "tokenExpired"
         ' Re-fetch M3U only; onFetchComplete will call updatePlayerWithFreshUrl.

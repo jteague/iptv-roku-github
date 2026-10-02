@@ -84,6 +84,8 @@ sub onVideoState()
             retryOrShowNoSignal()
         end if
     else if state = "finished"
+        ' A looping video (the built-in sample) restarts by itself.
+        if m.video.loop then return
         ' A live channel has no legitimate "end"; reaching this state with
         ' nothing played (e.g. a tuner returning an empty response) is a
         ' failure just like "error", not a graceful stop.
@@ -159,6 +161,7 @@ sub hideSpinner()
 end sub
 
 sub showError(msg as string)
+    hideSpinner()
     m.errLabel.text   = msg
     m.errBg.visible   = true
     m.errLabel.visible = true
