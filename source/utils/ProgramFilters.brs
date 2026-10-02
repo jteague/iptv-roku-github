@@ -8,8 +8,8 @@
 ' title and channel rules do most of the work there. Rules are case-insensitive
 ' PCRE; "" = no rule. Two rules veto a match: exclude (title or channel name) and
 ' skipCat (categories). The sports filters skip movies (The Karate Kid is not a
-' fight); Comedy skips children's shows and anime (routinely tagged Comedy).
-' "Martial Arts" is not a fight tag: it also marks shows like Avatar.
+' fight). "Martial Arts" is not a fight tag: it also marks shows like Avatar.
+' Array order is the order in the filter picker.
 
 function programFilters() as object
     soccerTitle = "\b(soccer|f(u|ú)tbol|premier league|la ?liga|serie a|bundesliga|ligue 1|eredivisie|champions league|europa league|conference league|uefa|concacaf|conmebol|copa (am(e|é)rica|libertadores|sudamericana|del rey)|gold cup|fifa|mls|major league soccer|leagues cup|nwsl|usl|liga mx|fa cup|carabao cup|efl|a-league|superliga|liga portugal|scottish premiership|africa cup of nations|fc)\b"
@@ -18,18 +18,26 @@ function programFilters() as object
     basketballTitle = "\b(nba|wnba|ncaab|basketball|march madness|euroleague)\b"
     baseballTitle   = "\b(mlb|baseball|b(e|é)isbol)\b"
     hockeyTitle     = "\b(nhl|hockey|stanley cup)\b"
+    golfTitle       = "\b(golf|pga|lpga|liv golf|ryder cup|solheim cup|presidents cup|dp world tour|korn ferry)\b"
+    tennisTitle     = "\b(tennis|atp|wta|wimbledon|roland[- ]garros|davis cup|billie jean king cup|laver cup|united cup)\b"
     motorTitle      = "\b(nascar|indycar|formula (1|one|2|e)|f1|f2|motogp|supercross|motocross|imsa|le mans|drag racing|nhra)\b"
     ' Non-soccer sports that share soccer words ("Premier League", "Fútbol").
     soccerExclude = "\b(cricket|caribbean premier league|indian premier league|rugby|darts|snooker|netball|f(u|ú)tbol americano)\b"
     shopExclude   = "\b(shop|qvc|hsn)\b"
     noMovies = "\|movie\|"
-    sportsTitle = "\b(ncaa[a-z]*|college (softball|volleyball)|softball|volleyball|golf|pga|lpga|tennis|atp|wta|rugby|nrl|afl|cricket|ipl|olympics?|sportscenter|sports?)\b"
     return [
-        programFilter("sports", "Sports", noMovies,
-            "\|([^|]*sport[^|]*|team event|soccer|football|basketball|baseball|hockey|boxing|mixed martial arts|[^|]*wrestling|golf|tennis|auto|auto racing|rugby|cricket|olympics)\|",
-            sportsTitle + "|" + footballTitle + "|" + basketballTitle + "|" + baseballTitle + "|" + hockeyTitle + "|" + motorTitle + "|" + soccerTitle + "|" + fightTitle,
-            "^(espn|cbs sports|bein sports|acc network|big ten network|sec network|fox sports|fox soccer|fox deportes|fubo sports|golf channel|tennis channel|mlb network|nba tv|nfl network|nhl network|nz sky sport|premier sports|sky sports|sportsnet|tsn|tnt sports|tudn|tva sports|rds|ufc|wwe|fight network)|\bsports?\b| - (mlb|nhl|nba|wnba|nfl|ncaa[a-z]*|mls|mma|ufc|boxing|soccer|wrestling|nascar|f1|golf|tennis)$",
-            "\b(mlb|nhl|nba|wnba|nfl|ncaa[a-z]*|mls|sports|events|ppv)\b", shopExclude),
+        programFilter("news", "News", noMovies,
+            "\|(news|newsmagazine)\|", "",
+            "^(cnn|fox news|msnbc|cnbc|bloomberg|fox business|newsmax|sky news|bbc news|cbs news|abc news|nbc news|newsnation|the weather channel)",
+            "", ""),
+        programFilter("kids", "Kids", "",
+            "\|(children|kids)\|", "",
+            "pbs ?kids|disney (channel|junior|jr)|nick(elodeon| jr)|cartoon ?network|cartoonito|boomerang|pogo|kidz|cartoonz|studio ghibli|universal kids|baby ?tv",
+            "", ""),
+        programFilter("gameShows", "Game Shows", "",
+            "\|game show\|",
+            "\b(jeopardy|wheel of fortune|family feud|the price is right|let's make a deal|press your luck|the chase|who wants to be a millionaire|deal or no deal)\b",
+            "game show network|\bgsn\b|buzzr", "", ""),
         ' American football. British titles and channels say "Football" for soccer.
         programFilter("football", "Football", noMovies,
             "\|football\|", footballTitle,
@@ -45,39 +53,20 @@ function programFilters() as object
             "\|soccer\|", soccerTitle,
             "golazo|fox soccer|sky sports? (football|premier league)| - (soccer|mls|epl|nwsl|uefa|fifa)$",
             "\b(soccer|mls|epl|nwsl|uefa)\b", soccerExclude),
-        programFilter("soccerMls", "Soccer MLS", noMovies,
-            "", "\b(mls|major league soccer|leagues cup)\b", " - mls$|\bmls\b", "\bmls\b", ""),
-        ' Everything soccer outside the US leagues: leagues abroad and national teams.
-        programFilter("soccerIntl", "Soccer International", noMovies,
-            "\|soccer\|", soccerTitle,
-            "golazo|fox soccer|sky sports? (football|premier league)| - (soccer|epl|uefa|fifa)$",
-            "\b(soccer|epl|uefa)\b",
-            "\b(mls|major league soccer|leagues cup|nwsl|usl|college soccer|ncaa[a-z]*)\b|" + soccerExclude),
-        programFilter("fights", "Fights", "\|(movie|documentary)\|",
+        programFilter("golf", "Golf", noMovies,
+            "\|golf\|", golfTitle, "^golf channel| - (golf|pga)$", "\b(golf|pga)\b", "\b(mini(ature)?|disc|crazy) golf\b"),
+        programFilter("tennis", "Tennis", noMovies,
+            "\|tennis\|", tennisTitle, "^tennis channel| - tennis$", "\btennis\b", "\b(table|paddle|platform) tennis\b"),
+        programFilter("fights", "Combat Sports", "\|(movie|documentary)\|",
             "\|(boxing|kickboxing|mma|mixed martial arts|[^|]*wrestling)\|", fightTitle,
             "^(ufc|wwe|fight network)| - (mma|ufc|boxing|bjj|wrestling|kickboxing|bkfc|pfl)$",
             "\b(ufc|mma|boxing|ppv)\b", ""),
         programFilter("motor", "Motorsports", noMovies,
             "\|(auto|auto racing|drag racing|motorcycle racing|motorsports?)\|", motorTitle,
             "sky sports f1| - (nascar|f1|indycar|motogp)$", "", "\b(horse|greyhound)\b"),
-        programFilter("comedy", "Comedy", "\|(children|kids|anime)\|",
-            "\|(sitcom|stand-?up|[^|]*comed[^|]*)\|", "",
-            "^comedy central", "", ""),
         programFilter("movies", "Movies", "",
             "\|(movie|feature film|tv movie)\|", "",
-            "^(hbo|cinemax|showtime|starz|mgm|fxm|sky cinema|tcm)|\bmovie|moviez", "", ""),
-        programFilter("kids", "Kids", "",
-            "\|(children|kids)\|", "",
-            "pbs ?kids|disney (channel|junior|jr)|nick(elodeon| jr)|cartoon ?network|cartoonito|boomerang|pogo|kidz|cartoonz|studio ghibli|universal kids|baby ?tv",
-            "", ""),
-        programFilter("gameShows", "Game Shows", "",
-            "\|game show\|",
-            "\b(jeopardy|wheel of fortune|family feud|the price is right|let's make a deal|press your luck|the chase|who wants to be a millionaire|deal or no deal)\b",
-            "game show network|\bgsn\b|buzzr", "", ""),
-        programFilter("news", "News", noMovies,
-            "\|(news|newsmagazine)\|", "",
-            "^(cnn|fox news|msnbc|cnbc|bloomberg|fox business|newsmax|sky news|bbc news|cbs news|abc news|nbc news|newsnation|the weather channel)",
-            "", "")
+            "^(hbo|cinemax|showtime|starz|mgm|fxm|sky cinema|tcm)|\bmovie|moviez", "", "")
     ]
 end function
 

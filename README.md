@@ -13,7 +13,7 @@ with a picture-in-picture preview and a fullscreen player. Written in plain Brig
 
 - Guide grid with a live preview of the current channel and details of the selected show (poster, rating, episode, genres)
 - Any number of M3U + XMLTV sources, in the order you choose
-- "On now" filters: Sports, Football, Soccer, Movies, Kids, News and more, plus Favorites
+- "On now" filters: News, Kids, Football, Soccer, Golf, Movies and more, plus Favorites
 - Hold OK on a channel to set a reminder, favorite it, hide it, or record it (with [Dispatcharr](https://github.com/Dispatcharr/Dispatcharr))
 - Guide and stream URLs refresh in the background
 - Channels whose streams the Roku can't play are hidden for 14 days, and can be retried from Settings
@@ -72,6 +72,8 @@ Free public live streams with a made-up guide, republished daily (also what Roku
 
 The guide then shows three channels: DW English, DW Español and Unified Streaming Demo. Deep links work with
 these channel ids: `curl -d '' "http://<roku-ip>:8060/launch/dev?contentId=dw-english&mediaType=live"`.
+Before any playlist is added, `contentId=big-buck-bunny` plays the built-in [sample film](https://jteague.github.io/iptv-roku-github/sample.html)
+(Big Buck Bunny, CC BY 3.0).
 
 | | |
 |---|---|

@@ -883,11 +883,11 @@ end function
 
 sub openKeyboard(name as string)
     input = m.top.findNode(name)
-    dlg = CreateObject("roSGNode", "KeyboardDialog")
+    dlg = CreateObject("roSGNode", "StandardKeyboardDialog")
     dlg.title   = m.inputTitles[name]
     dlg.text    = input.text
     dlg.buttons = ["OK", "Cancel"]
-    dlg.keyboard.textEditBox.maxTextLength = input.maxTextLength
+    dlg.textEditBox.maxTextLength = input.maxTextLength
     dlg.observeField("buttonSelected", "onKeyboardButton")
     dlg.observeField("wasClosed", "onKeyboardClosed")
     m.kbTarget = name
@@ -1000,6 +1000,7 @@ sub renderAbout()
             memText = Int(mon.GetChannelAvailableMemory() / 1024).toStr() + " MB available to the app  ·  "
         end if
     catch e
+        print "[Settings] memory monitor unavailable: "; e.message
         memText = ""
     end try
     setAboutText("aboutMemory", memText + "memory level " + di.GetGeneralMemoryLevel())

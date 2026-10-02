@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GuideBox Sample Film</title>
+<style>
+  :root { color-scheme: light dark; --bg: #F4EEDD; --ink: #2A2D22; --muted: #5C6250; --line: #D8CFB6; --accent: #4F7773; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1F2119; --ink: #F2E3BC; --muted: #96BBBB; --line: #414535; --accent: #96BBBB; } }
+  body { background: var(--bg); color: var(--ink); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 40px 16px 64px; }
+  main { max-width: 68ch; margin: 0 auto; }
+  h1 { font-size: 1.8em; line-height: 1.2; margin: 0 0 4px; }
+  h2 { font-size: 1.15em; margin: 2em 0 .4em; }
+  p, li { margin: .5em 0; }
+  .date { color: var(--muted); margin: 0 0 2em; }
+  .short { border-left: 4px solid var(--accent); padding: 4px 0 4px 16px; font-size: 1.05em; }
+  a { color: var(--accent); overflow-wrap: anywhere; }
+  code { font-size: .9em; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+<h1>GuideBox sample film</h1>
+<p class="date">Published October 1, 2026</p>
+
+<p class="short"><strong>Big Buck Bunny</strong><br>
+(c) copyright 2008, Blender Foundation / <a href="https://www.bigbuckbunny.org">www.bigbuckbunny.org</a><br>
+Licensed under the <a href="https://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0</a>
+license.</p>
+
+<h2>What it's for</h2>
+<p>GuideBox comes with no channels; you add your own playlist. So that a link into the app (a Roku deep link) has
+something to play before any playlist has been added, the app has one built-in sample: this film. Deep link with
+<code>contentId=big-buck-bunny</code> and <code>mediaType=live</code>. It is never added to the guide, and once you
+have your own channels it only plays when asked for by that link.</p>
+
+<h2>Licence and source</h2>
+<ul>
+  <li>The Blender Foundation releases Big Buck Bunny under Creative Commons Attribution 3.0, which allows anyone to
+    share and show it, commercially too, with credit: see
+    <a href="https://peach.blender.org/about/">peach.blender.org/about</a>.</li>
+  <li>The stream is made from the Foundation's own file,
+    <a href="https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_720p_h264.mov.zip">download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_720p_h264.mov.zip</a>,
+    by <a href="https://github.com/jteague/iptv-roku-github/blob/main/demo/make_sample.sh">demo/make_sample.sh</a>.
+    The only changes are the format (720p HLS) and the audio (5.1 mixed down to stereo). The film is complete,
+    end credits included.</li>
+  <li>The credit above is shown in the app whenever the sample's info panel is up.</li>
+</ul>
+
+<h2>Where it's served from</h2>
+<p>This site (<code>jteague.github.io/iptv-roku-github</code>), hosted by GitHub Pages:
+<a href="sample/bbb.m3u8">sample/bbb.m3u8</a>. GuideBox is not affiliated with or endorsed by the Blender
+Foundation.</p>
+</main>
+</body>
+</html>

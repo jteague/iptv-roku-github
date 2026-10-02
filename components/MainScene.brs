@@ -179,6 +179,7 @@ sub openSettings()
     m.settingsScene = m.top.createChild("SettingsScene")
     m.settingsScene.epgInfo = epgInfo()
     m.settingsScene.streamUrls = codecHiddenStreamUrls()
+    if enabledSources(readSettings()).count() = 0 then m.settingsScene.backHint = "Back exits GuideBox"
     m.settingsScene.observeField("action", "onSettingsAction")
     m.settingsScene.setFocus(true)
     if m.guideScene  <> invalid
@@ -213,9 +214,14 @@ sub onSettingsAction()
     else if action = "refresh"
         triggerFetch(false)
     else
-        ' Cancelled with no data yet: back to the error screen, the only way on
-        ' from there (Retry or Settings again).
-        if m.channels.count() = 0
+        ' Cancelled with nothing set up (a first run): Settings is the home
+        ' screen, so Back offers to exit over it, like Back in the guide.
+        ' Cancelled after a failed fetch: back to the error screen, the only way
+        ' on from there (Retry or Settings again).
+        if m.channels.count() = 0 and enabledSources(readSettings()).count() = 0
+            openSettings()
+            showExitDialog()
+        else if m.channels.count() = 0
             msg = m.pendingErrorMsg
             if msg = "" then msg = "No channels loaded."
             showInitialError(msg)
@@ -680,9 +686,10 @@ sub onGuideAction()
     end if
 end sub
 
-' Back in the guide. The guide is the home screen, so Back offers to exit
-' (certification 4.6: Back must lead out of the app, never loop guide <-> player).
-' With a channel in the PIP the first button goes back to it fullscreen.
+' Back in the guide, or in Settings before any source is set up. Those are the
+' home screen, so Back offers to exit (certification 4.6: Back must lead out of
+' the app, never loop guide <-> player). With a channel in the PIP the first
+' button goes back to it fullscreen.
 sub showExitDialog()
     if m.top.dialog <> invalid then return
     dialog = CreateObject("roSGNode", "Dialog")
@@ -720,7 +727,11 @@ sub closeExitDialog()
     dialog.unobserveField("buttonSelected")
     dialog.unobserveField("wasClosed")
     m.top.dialog = invalid
-    if m.guideScene <> invalid and m.guideScene.visible then m.guideScene.setFocus(true)
+    if m.settingsScene <> invalid
+        m.settingsScene.setFocus(true)
+    else if m.guideScene <> invalid and m.guideScene.visible
+        m.guideScene.setFocus(true)
+    end if
 end sub
 
 ' ── Deep linking ─────────────────────────────────────────────────────────────
@@ -733,7 +744,8 @@ sub onDeepLink()
     print "[MainScene] deep link " + link.contentId.toStr()
     m.pendingLink = link
     ' Mid-fetch or first launch: finishFetch applies it once channels are in.
-    if m.activeFetch = invalid and m.channels.count() > 0 then applyDeepLink()
+    ' With no source enabled no fetch is coming, so apply it now (the sample).
+    if m.activeFetch = invalid and (m.channels.count() > 0 or enabledSources(readSettings()).count() = 0) then applyDeepLink()
 end sub
 
 ' Plays the linked channel fullscreen over the guide, so Back lands on the guide.
@@ -750,6 +762,7 @@ sub applyDeepLink()
             exit for
         end if
     end for
+    if ch = invalid and id = SAMPLE_ID() then ch = sampleChannel()
     if ch = invalid
         print "[MainScene] deep link: no channel " + id
         return
@@ -759,9 +772,41 @@ sub applyDeepLink()
         m.settingsScene = invalid
     end if
     closeExitDialog()
+    if ch.id = SAMPLE_ID()
+        ' Not a guide channel: no guide behind it and not remembered as last channel.
+        hideLoading()
+        hideError()
+        launchComplete()
+        m.previousChannel = m.currentChannel
+        m.currentChannel  = ch
+        showPlayer(ch)
+        return
+    end if
     if m.guideScene = invalid or not m.guideScene.visible then openGuide()
     openPlayer(ch)
 end sub
+
+' ── Built-in sample ──────────────────────────────────────────────────────────
+
+' The app ships no channels; this one exists so a deep link has something to
+' play before any playlist is added (Roku's automated deep-link and playback
+' tests run on a clean install). Big Buck Bunny, (c) copyright 2008, Blender
+' Foundation / www.bigbuckbunny.org, CC BY 3.0, built by demo/make_sample.sh
+' and published with the demo playlist. It plays whole and loops, credits included.
+function SAMPLE_ID() as string
+    return "big-buck-bunny"
+end function
+
+function sampleChannel() as object
+    return { id: SAMPLE_ID(), number: "", name: "Big Buck Bunny", logoUrl: "", group: "",
+        streamUrl: "https://jteague.github.io/iptv-roku-github/sample/bbb.m3u8", loop: true }
+end function
+
+function sampleProgram() as object
+    nowSec = nowEpoch()
+    return { title: "Big Buck Bunny", start: nowSec, stop: nowSec + 597, year: "2008", genres: ["Animation"],
+        desc: "(c) copyright 2008, Blender Foundation / www.bigbuckbunny.org. Licensed under Creative Commons Attribution 3.0. A built-in sample: add your own playlist in Settings to watch your channels." }
+end function
 
 ' Long-press OK menu in the guide: { action, channel }.
 sub onGuideMenuAction()
@@ -869,6 +914,10 @@ end sub
 function buildFocusedProgram(ch as object) as object
     fp = { channel: ch, program: invalid }
     if ch = invalid then return fp
+    if ch.id = SAMPLE_ID()
+        fp.program = sampleProgram()
+        return fp
+    end if
     if not m.programs.doesExist(ch.id) then return fp
     nowSec = nowEpoch()
     for each prog in m.programs[ch.id]
@@ -885,7 +934,12 @@ sub onPlayerAction()
     if action = "refreshNowPlaying"
         if m.currentChannel <> invalid then m.playerScene.focusedProgram = buildFocusedProgram(m.currentChannel)
     else if action = "backToGuide"
-        if m.guideScene = invalid
+        ' The sample never goes in the guide's PIP.
+        if m.currentChannel <> invalid and m.currentChannel.id = SAMPLE_ID() then m.currentChannel = m.previousChannel
+        if m.channels.count() = 0
+            ' The sample with no playlist yet: back to where a first run starts.
+            checkSettingsAndStart()
+        else if m.guideScene = invalid
             openGuide()
         else
             ' The guide may have been hidden for hours; bring its window back
@@ -905,6 +959,8 @@ sub onPlayerAction()
         if m.previousChannel <> invalid
             openPlayer(m.previousChannel)
         end if
+    else if action = "tokenExpired" and m.currentChannel <> invalid and m.currentChannel.id = SAMPLE_ID()
+        m.playerScene.callFunc("showError", "The sample isn't available right now.")
     else if action = "tokenExpired"
         ' Re-fetch M3U only; onFetchComplete will call updatePlayerWithFreshUrl.
         triggerFetch(true)

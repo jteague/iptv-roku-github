@@ -1,5 +1,7 @@
 # Publishes demo/demo.m3u and a fresh demo EPG to GitHub Pages every day, for
-# Roku certification reviewers (and anyone trying the app without a provider).
+# Roku certification reviewers (and anyone trying the app without a provider),
+# plus the app's built-in sample stream (Big Buck Bunny, CC BY 3.0; see
+# demo/sample.html), built once from the Blender Foundation's file and cached.
 # Only runs on the public GitHub copy. Enable Pages with source "GitHub Actions".
 name: Demo playlist
 on:
@@ -24,9 +26,19 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - id: sample-cache
+        uses: actions/cache@v4
+        with:
+          path: sample
+          key: sample-${{ hashFiles('demo/make_sample.sh') }}
+      - if: steps.sample-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          demo/make_sample.sh sample
       - run: |
           mkdir -p site
-          cp demo/demo.m3u demo/privacy.html demo/terms.html site/
+          cp demo/demo.m3u demo/privacy.html demo/terms.html demo/sample.html site/
+          cp -r sample site/sample
           python3 demo/make_epg.py > site/epg.xml
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

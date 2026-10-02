@@ -23,6 +23,8 @@ sub onChannelChange()
     m.retryCount = 0
     m.codecRetried = false
     m.top.action = ""
+    ' Only the built-in sample (a film, not a live channel) loops.
+    m.video.loop = ch.doesExist("loop")
     playChannel(ch.streamUrl)
 end sub
 

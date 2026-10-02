@@ -9,6 +9,8 @@
         <!-- { channelId: streamUrl } for the codec-hidden channels that are loaded, set by
              MainScene (codecHiddenStreamUrls()); Hidden Channels > Retry plays them -->
         <field id="streamUrls" type="assocarray" />
+        <!-- Footer hint for Back, set by MainScene: where Back goes depends on whether a guide exists -->
+        <field id="backHint" type="string" alias="navHint.text" />
     </interface>
     <children>
         <Rectangle id="bg" color="0x1F2119FF" width="1920" height="1080" translation="[0,0]" />
@@ -404,7 +406,7 @@
                 width="300" height="56"
                 horizAlign="center" vertAlign="center"
                 translation="[782, 532]" />
-            <Label text="Last channel plays the channel you watched last in the picture-in-picture window."
+            <Label text="Plays your last channel in the small picture."
                 font="font:SmallSystemFont"
                 color="0x96BBBBAA"
                 width="730" height="80"

@@ -26,7 +26,12 @@ telnet <roku-ip> 8085
 ## Roku certification
 
 Kept store-ready (Roku's certification criteria), so don't regress these.
-- Manifest: `rsg_version=1.3` (required from 2026-10-01), `supports_input_launch=1`, focus icons 290x218 (hd) and
+- Roku's static analysis (Channel Store upload) must stay warning-free: no deprecated manifest keys (`subtitle`),
+  memory monitoring in main.brs, `StandardKeyboardDialog` not `KeyboardDialog`.
+- Deep links with no playlist added play the built-in sample (`SAMPLE_ID` "big-buck-bunny", MainScene): Big Buck Bunny,
+  CC BY 3.0, built by `demo/make_sample.sh` and published with the demo playlist (`demo/sample.html` has the credit).
+  Roku's automated deep-link and play-performance tests run on a clean install and depend on it.
+- Manifest: `rsg_version=1.3` (required from 2026-10-01), `supports_input_launch=1`, `minimum_firmware_version=15.1`, focus icons 290x218 (hd) and
   540x405 (fhd), colours clamped to broadcast-safe 16..235. Bump `build_version` for every submitted build.
 - `AppLaunchComplete` beacon (`launchComplete`, MainScene) fires once when the guide, Settings or the error screen is
   first up; an error dialog before it is wrapped in `AppDialogInitiate`/`AppDialogComplete`.
@@ -49,12 +54,13 @@ Kept store-ready (Roku's certification criteria), so don't regress these.
 
 ```
 source/main.brs                 roSGScreen bootstrap; passes deep links (launch args `contentId`, roInput) to
-                                MainScene.deepLink and ends the app when MainScene sets `exitApp`
+                                MainScene.deepLink and ends the app when MainScene sets `exitApp`; logs memory limit and
+                                low-memory events (roAppMemoryMonitor + roDeviceInfo, which certification's static analysis checks for)
 source/utils/M3UParser.brs      #EXTINF → { id, number, name, logoUrl, group, streamUrl } (group = group-title, "" if none)
 source/utils/XmltvParser.brs    XMLTV → programs keyed by channel id, sorted by start; keeps subtitle/rating/episode/year/genres,
                                 plus `cats` (every category, lowercased, "|a|b|") for the filters
 source/utils/DateUtils.brs      XMLTV timestamp → epoch; epoch → "H:MM AM"
-source/utils/ProgramFilters.brs "on now" filter rules (Sports, Soccer MLS, Kids, …): categories, title, channel name,
+source/utils/ProgramFilters.brs "on now" filter rules (News, Kids, Game Shows, Football, …; array order = picker order): categories, title, channel name,
                                 group-title regexes + exclude/skipCat vetoes. Some providers' channels have no <category> tags, so
                                 title/channel rules carry them. Tune against real data before changing (see note below)
 source/utils/RegistryUtils.brs  settings (section "iptv", sources as a JSON list) + hidden channels: "iptv_hidden" (user,
@@ -98,7 +104,7 @@ components/PlayerScene          fullscreen Video, NowPlayingPanel on Up (10s aut
 components/CountdownRing        64px ring of 40 ticks that go dark clockwise + seconds left; NowPlayingPanel's
                                 auto-hide countdown (visual only; PlayerScene's panelTimer still hides the panel)
 components/SettingsScene        left nav (IPTV Sources / Guide / Options / Remote / Hidden Channels / About) + content pages; source list with
-                                a per-source editor page; KeyboardDialog for text entry. Hidden Channels lists both kinds
+                                a per-source editor page; StandardKeyboardDialog for text entry. Hidden Channels lists both kinds
                                 (colour strip + status: Deep Teal "Hidden by you", Camel "Unsupported, N days left"), pooled
                                 rows like the source list; Unhide / Hide Permanently / Unhide All write the registry at
                                 once rather than on Save. Retry (codec rows) plays the stream in a preview overlay
@@ -155,7 +161,7 @@ Data flow: FetchDataTask → MainScene (`mergeFetchResult`, blacklist filter) �
   `node.callFunc("name", arg)`; `node.name(arg)` does not work on an roSGNode.
 - **Never give a TextEditBox focus.** It swallows Down (clears text) and Left/Right (cursor), so the
   scene's `onKeyEvent` stops seeing them. SettingsScene keeps focus on itself, highlights the field's
-  border rect, and opens a `KeyboardDialog` via `m.top.getScene().dialog` on OK.
+  border rect, and opens a `StandardKeyboardDialog` via `m.top.getScene().dialog` on OK.
 - Adding a setting: add nodes to a page `<Group>` in SettingsScene.xml, add a row (`[id]`, or several ids for
   items side by side) to that page's `rows` in `m.pages`, and register it in `m.inputBoxes` (+ `m.inputTitles`), `m.choosers` (pill row:
   `<prefix>N` rect + `<prefix>LabelN` label per option, plus a focus-ring rect) or `m.buttonColors`.
@@ -184,7 +190,7 @@ Data flow: FetchDataTask → MainScene (`mergeFetchResult`, blacklist filter) �
 ## Tuning the programme filters
 
 Rules are regexes, so false positives creep in ("World Series of Darts" in Baseball, a cricket "Caribbean Premier
-League" in Soccer, *Avatar* tagged "Martial Arts" in Fights). Check a change against real data before
+League" in Soccer, *Avatar* tagged "Martial Arts" in Combat Sports). Check a change against real data before
 shipping: fetch a full M3U + XMLTV and run the same rules over every programme
 (Python `re` is close enough to roRegex's PCRE), looking at what each filter picks up and why (cat/title/chan/group).
 
