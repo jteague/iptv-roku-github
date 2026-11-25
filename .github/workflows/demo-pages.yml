@@ -46,3 +46,7 @@ jobs:
           path: site
       - id: deploy
         uses: actions/deploy-pages@v4
+      - name: Keep workflow active
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          time_elapsed: '50'
